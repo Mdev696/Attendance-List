@@ -20,7 +20,7 @@
             background: var(--vivo-light);
             margin: 0;
             padding: 10px;
-            /* Reduzido para telas menores */
+            /* Reduzido para dar mais espaço em telas pequenas */
         }
 
         .container {
@@ -28,7 +28,6 @@
             margin: auto;
             background: white;
             padding: 15px;
-            /* Ajustado */
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             border: 1px solid #e2e8f0;
@@ -39,17 +38,17 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid var(--vivo-purple);
-            padding-bottom: 20px;
-            margin-bottom: 25px;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
             /* Permite quebrar linha no mobile */
-            gap: 15px;
+            gap: 10px;
         }
 
         .logo-area {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
         }
 
         .logo-v {
@@ -67,9 +66,9 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .db-card {
@@ -79,7 +78,6 @@
             text-align: center;
             border: 1px solid #e2e8f0;
             border-top: 4px solid var(--vivo-purple);
-            transition: transform 0.3s ease;
         }
 
         .db-card h3 {
@@ -98,9 +96,9 @@
         .add-box {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            gap: 10px;
             background: #f8fafc;
-            padding: 20px;
+            padding: 15px;
             border-radius: 12px;
             margin-bottom: 20px;
             border: 1px solid #e2e8f0;
@@ -110,24 +108,23 @@
             grid-column: 1 / -1;
             background: var(--vivo-purple);
             color: white;
-            padding: 12px 20px;
-            cursor: pointer;
+            padding: 10px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-radius: 8px;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 12px;
         }
 
         .list-container {
             grid-column: 1 / -1;
             background: #fff;
-            padding: 15px;
+            padding: 10px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 10px;
-            max-height: 250px;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 8px;
+            max-height: 200px;
             overflow-y: auto;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
@@ -138,21 +135,27 @@
             align-items: center;
             gap: 8px;
             background: white;
-            padding: 8px 15px;
+            padding: 6px 12px;
             border-radius: 20px;
             border: 1px solid #e2e8f0;
-            cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
+        }
+
+        /* TABELA RESPONSIVA */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            /* Scroll horizontal no mobile */
+            -webkit-overflow-scrolling: touch;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
         }
 
         table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+            border-collapse: collapse;
             font-size: 11px;
-            margin-top: 10px;
-            min-width: 800px;
-            /* Garante scroll horizontal em tabelas densas */
+            min-width: 900px;
         }
 
         th {
@@ -165,20 +168,21 @@
         }
 
         td {
-            padding: 10px 12px;
+            padding: 10px;
             border-bottom: 1px solid #f1f5f9;
+            white-space: nowrap;
         }
 
         .btn-primary {
             background: var(--vivo-purple);
             color: white;
-            padding: 1rem;
+            padding: 12px;
             border-radius: 8px;
             font-weight: bold;
             border: none;
             width: 100%;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             margin-top: 10px;
         }
 
@@ -186,19 +190,20 @@
             background: var(--success);
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 8px 12px;
             border-radius: 6px;
             cursor: pointer;
-            font-weight: bold;
+            font-size: 12px;
         }
 
         .btn-danger {
             background: var(--danger);
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 8px 12px;
             border-radius: 6px;
             cursor: pointer;
+            font-size: 12px;
         }
 
         input,
@@ -206,12 +211,12 @@
             padding: 10px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .controls-table {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 10px;
             align-items: center;
             flex-wrap: wrap;
@@ -219,44 +224,29 @@
 
         #inputBusca {
             flex-grow: 1;
-            min-width: 200px;
         }
 
-        /* Ajustes de Responsividade */
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .header-actions {
-                width: 100%;
-                display: flex;
-                justify-content: space-between;
-            }
-
+        /* Media Query para Celulares Pequenos */
+        @media (max-width: 600px) {
             .dashboard-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
 
-            .btn-success,
-            .btn-danger {
-                padding: 10px;
-                font-size: 12px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
+            header {
+                justify-content: center;
+                text-align: center;
             }
 
-            .list-container {
-                grid-template-columns: 1fr;
+            .logo-area {
+                width: 100%;
+                justify-content: center;
             }
 
-            .section-header {
-                font-size: 11px;
+            .header-actions {
+                width: 100%;
+                justify-content: center;
+                display: flex;
+                gap: 5px;
             }
         }
     </style>
@@ -269,13 +259,13 @@
             <div class="logo-area">
                 <div class="logo-v">V</div>
                 <div>
-                    <h1 style="margin:0; font-size: 1.3rem;">Gestão de Presença</h1>
+                    <h1 style="margin:0; font-size: 1.2rem;">Gestão de Presença</h1>
                     <small style="color: #64748b;">Operacional Telefônica</small>
                 </div>
             </div>
-            <div style="display:flex; gap:8px; align-items:center; flex-wrap: wrap;">
+            <div class="header-actions" style="display:flex; gap:8px; align-items:center;">
                 <input type="date" id="dataSelecionada" onchange="atualizarTabela()">
-                <button class="btn-success" onclick="exportarExcel()">Exportar</button>
+                <button class="btn-success" onclick="exportarExcel()">Excel</button>
                 <button class="btn-danger" onclick="limparTudo()">Limpar</button>
             </div>
         </header>
@@ -309,30 +299,30 @@
             <div class="section-header">
                 <span>SELECIONAR COLABORADORES</span>
                 <button onclick="selectAll(true)"
-                    style="background:white; color:var(--vivo-purple); border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:4px 10px;">TODOS</button>
+                    style="background:white; color:var(--vivo-purple); border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:2px 8px;">TODOS</button>
             </div>
             <div id="colabSection" class="list-container">
                 <div id="listaTecnicos" style="display: contents;"></div>
             </div>
 
-            <div class="section-header">DEFINIR STATUS</div>
+            <div class="section-header">DEFINIR STATUS (LANÇA O MÊS TODO)</div>
             <div id="statusRadios" style="grid-column: 1/-1; display:flex; gap:8px; flex-wrap:wrap;"></div>
 
             <button class="btn-primary" onclick="salvarPresenca()">EFETUAR LANÇAMENTO</button>
         </div>
 
         <div class="controls-table">
-            <input type="text" id="inputBusca" onkeyup="atualizarTabela()" placeholder="🔍 Buscar Nome ou Matrícula...">
+            <input type="text" id="inputBusca" onkeyup="atualizarTabela()"
+                placeholder="🔍 Buscar por Nome ou Matrícula...">
             <select id="limiteRegistros" onchange="atualizarTabela()">
-                <option value="5">Ver 5</option>
-                <option value="10">Ver 10</option>
-                <option value="20">Ver 20</option>
-                <option value="100">Ver 100</option>
-                <option value="1000">Ver 100</option>
+                <option value="10">10 itens</option>
+                <option value="20">20 itens</option>
+                <option value="30">30 itens</option>
+                <option value="100">100 itens</option>
             </select>
         </div>
 
-        <div style="overflow-x:auto; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <div class="table-responsive">
             <table id="tabelaPresenca">
                 <thead>
                     <tr>
@@ -359,44 +349,7 @@
         let baseDados = {
             "WILLIAMS DOS SANTOS FERREIRA": { uf: "RJ", empresa: "Telefonica", bucket: "ZONA SUL 4", matricula: "03514505", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
             "ADRIANO NUNES MARQUES": { uf: "RJ", empresa: "Telefonica", bucket: "ZONA SUL 4", matricula: "03523247", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "GABRIEL DOS SANTOS SILVA": { uf: "RJ", empresa: "Telefonica", bucket: "ZONA SUL 1", matricula: "03552297", super: "MARCELO ANTUNES DO ESPIRITO SANTO BARRETO", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "CARLOS ALBERTO RIBEIRO": { uf: "RJ", empresa: "Telefonica", bucket: "BARRA 01", matricula: "00081401", super: "ELIZEU SOUZA DE MORAES", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "ROBERTO ALVES": { uf: "ES", empresa: "Telefonica", bucket: "VITORIA 1", matricula: "03612244", super: "FABRICIO SILVA", coord: "ALAN MENDES", gerente: "SERGIO FREITAS" },
-            "MARCOS PAULO": { uf: "ES", empresa: "Telefonica", bucket: "VITORIA 1", matricula: "03615599", super: "FABRICIO SILVA", coord: "ALAN MENDES", gerente: "SERGIO FREITAS" },
-            "LUCAS SOUZA": { uf: "RJ", empresa: "Telefonica", bucket: "NITEROI 2", matricula: "03518877", super: "JOSE CARLOS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "FELIPE COSTA": { uf: "RJ", empresa: "Telefonica", bucket: "NITEROI 2", matricula: "03519966", super: "JOSE CARLOS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "BRUNO OLIVEIRA": { uf: "RJ", empresa: "Telefonica", bucket: "CENTRO 1", matricula: "03521122", super: "ANDRE LUIS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "DIEGO SANTOS": { uf: "RJ", empresa: "Telefonica", bucket: "CENTRO 1", matricula: "03523344", super: "ANDRE LUIS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" }, // VÍRGULA ADICIONADA AQUI
-            "ANA PAULA SILVA": { uf: "RJ", empresa: "Telefonica", bucket: "CENTRO 2", matricula: "03524410", super: "ANDRE LUIS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "CARLOS EDUARDO": { uf: "ES", empresa: "Telefonica", bucket: "VITORIA 1", matricula: "03524411", super: "RODRIGO FARIA", coord: "ALINE SOUZA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "BEATRIZ GOMES": { uf: "RJ", empresa: "Telefonica", bucket: "NORTE 1", matricula: "03524412", super: "ANDRE LUIS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "RICARDO OLIVEIRA": { uf: "RJ", empresa: "Telefonica", bucket: "OESTE 1", matricula: "03524413", super: "PAULO MELLO", coord: "FABIO REIS", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "JULIANA COSTA": { uf: "ES", empresa: "Telefonica", bucket: "VILA VELHA", matricula: "03524414", super: "RODRIGO FARIA", coord: "ALINE SOUZA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "FERNANDO ALVES": { uf: "RJ", empresa: "Telefonica", bucket: "CENTRO 1", matricula: "03524415", super: "ANDRE LUIS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "MARIANA SOUZA": { uf: "RJ", empresa: "Telefonica", bucket: "SUL 2", matricula: "03524416", super: "PAULO MELLO", coord: "FABIO REIS", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "LUCAS PEREIRA": { uf: "ES", empresa: "Telefonica", bucket: "SERRA 1", matricula: "03524417", super: "RODRIGO FARIA", coord: "ALINE SOUZA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "PATRICIA LIMA": { uf: "RJ", empresa: "Telefonica", bucket: "NORTE 2", matricula: "03524418", super: "ANDRE LUIS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "ROBERTO DIAS": { uf: "RJ", empresa: "Telefonica", bucket: "CENTRO 1", matricula: "03524419", super: "ANDRE LUIS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "CAMILA MARTINS": { uf: "ES", empresa: "Telefonica", bucket: "LINHARES", matricula: "03524420", super: "RODRIGO FARIA", coord: "ALINE SOUZA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "GUSTAVO REIS": { uf: "RJ", empresa: "Telefonica", bucket: "OESTE 2", matricula: "03524421", super: "PAULO MELLO", coord: "FABIO REIS", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "LETICIA BARROS": { uf: "RJ", empresa: "Telefonica", bucket: "SUL 1", matricula: "03524422", super: "ANDRE LUIS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "BRUNO FARIAS": { uf: "ES", empresa: "Telefonica", bucket: "CARIACICA", matricula: "03524423", super: "RODRIGO FARIA", coord: "ALINE SOUZA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "AMANDA ROCHA": { uf: "RJ", empresa: "Telefonica", bucket: "CENTRO 2", matricula: "03524424", super: "ANDRE LUIS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "VINICIUS MOURA": { uf: "RJ", empresa: "Telefonica", bucket: "NORTE 1", matricula: "03524425", super: "PAULO MELLO", coord: "FABIO REIS", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "DANIELA VIANA": { uf: "ES", empresa: "Telefonica", bucket: "VITORIA 2", matricula: "03524426", super: "RODRIGO FARIA", coord: "ALINE SOUZA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "THIAGO NEVES": { uf: "RJ", empresa: "Telefonica", bucket: "OESTE 1", matricula: "03524427", super: "ANDRE LUIS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "PRISCILA MELO": { uf: "RJ", empresa: "Telefonica", bucket: "CENTRO 1", matricula: "03524428", super: "PAULO MELLO", coord: "FABIO REIS", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "LEONARDO LUZ": { uf: "ES", empresa: "Telefonica", bucket: "VILA VELHA", matricula: "03524429", super: "RODRIGO FARIA", coord: "ALINE SOUZA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "TATIANE FREITAS": { uf: "RJ", empresa: "Telefonica", bucket: "SUL 2", matricula: "03524430", super: "ANDRE LUIS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "MARCELO RAMOS": { uf: "RJ", empresa: "Telefonica", bucket: "NORTE 2", matricula: "03524431", super: "PAULO MELLO", coord: "FABIO REIS", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "FABIANA XAVIER": { uf: "ES", empresa: "Telefonica", bucket: "SERRA 2", matricula: "03524432", super: "RODRIGO FARIA", coord: "ALINE SOUZA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "RODRIGO MENDES": { uf: "RJ", empresa: "Telefonica", bucket: "CENTRO 2", matricula: "03524433", super: "ANDRE LUIS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "VANESSA NUNES": { uf: "RJ", empresa: "Telefonica", bucket: "OESTE 2", matricula: "03524434", super: "PAULO MELLO", coord: "FABIO REIS", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "IGOR CARDOSO": { uf: "ES", empresa: "Telefonica", bucket: "VITORIA 1", matricula: "03524435", super: "RODRIGO FARIA", coord: "ALINE SOUZA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "MONICA TEIXEIRA": { uf: "RJ", empresa: "Telefonica", bucket: "NORTE 1", matricula: "03524436", super: "ANDRE LUIS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "RENATO BRAGA": { uf: "RJ", empresa: "Telefonica", bucket: "SUL 1", matricula: "03524437", super: "PAULO MELLO", coord: "FABIO REIS", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "CAROLINE DUARTE": { uf: "ES", empresa: "Telefonica", bucket: "CARIACICA", matricula: "03524438", super: "RODRIGO FARIA", coord: "ALINE SOUZA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "DIEGO ARAGAO": { uf: "RJ", empresa: "Telefonica", bucket: "CENTRO 1", matricula: "03524439", super: "ANDRE LUIS", coord: "MARCELO LIMA", gerente: "JOAO FERNANDO NUNES LIMA" }
+            "GABRIEL DOS SANTOS SILVA": { uf: "RJ", empresa: "Telefonica", bucket: "ZONA SUL 1", matricula: "03552297", super: "MARCELO ANTUNES DO ESPIRITO SANTO BARRETO", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" }
         };
 
         const listaStatus = ["PRESENTE", "FALTA", "ATESTADO", "FOLGA", "FÉRIAS"];
@@ -471,10 +424,9 @@
             const dt = document.getElementById('dataSelecionada').value;
             const busca = document.getElementById('inputBusca').value.toUpperCase();
             const limite = parseInt(document.getElementById('limiteRegistros').value);
-            let db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
 
-            let filtrados = db.filter(r => (r.data === dt) && (r.tecnico.toUpperCase().includes(busca) || r.matricula.includes(busca)))
-                .sort((a, b) => a.tecnico.localeCompare(b.tecnico));
+            let db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+            let filtrados = db.filter(r => r.data === dt && (r.tecnico.toUpperCase().includes(busca) || r.matricula.includes(busca))).sort((a, b) => a.tecnico.localeCompare(b.tecnico));
 
             document.getElementById('count-uf').innerText = [...new Set(filtrados.map(r => r.uf))].length;
             document.getElementById('count-colab').innerText = filtrados.length;
