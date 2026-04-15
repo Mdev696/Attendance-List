@@ -39,7 +39,7 @@
             padding-bottom: 15px;
             margin-bottom: 20px;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
         }
 
         .login-box {
@@ -48,7 +48,7 @@
             border-radius: 12px;
             border: 1px solid #e2e8f0;
             max-width: 400px;
-            margin: 80px auto;
+            margin: 40px auto;
             text-align: center;
         }
 
@@ -56,20 +56,17 @@
             display: none;
         }
 
+        /* Estilo da Tabela Desktop */
         .table-responsive {
             width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
             border-radius: 8px;
-            border: 1px solid #e2e8f0;
+            overflow: hidden;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 11px;
-            min-width: 1200px;
-            /* Aumentado para acomodar novas colunas */
+            font-size: 12px;
         }
 
         th {
@@ -81,30 +78,97 @@
         }
 
         td {
-            padding: 10px;
+            padding: 12px;
             border-bottom: 1px solid #f1f5f9;
-            white-space: nowrap;
+        }
+
+        /* RESPONSIVIDADE PARA CELULAR (CARD LAYOUT) */
+        @media screen and (max-width: 768px) {
+
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            /* Esconde os cabeçalhos da tabela no mobile */
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            tr {
+                margin-bottom: 15px;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                background: #fff;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            }
+
+            td {
+                border: none;
+                border-bottom: 1px solid #eee;
+                position: relative;
+                padding-left: 50%;
+                /* Espaço para o label */
+                white-space: normal;
+                text-align: right;
+                min-height: 35px;
+            }
+
+            /* Gera as etiquetas automáticas antes do valor */
+            td:before {
+                position: absolute;
+                top: 12px;
+                left: 12px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                color: var(--vivo-purple);
+                content: attr(data-label);
+            }
+
+            td:last-child {
+                text-align: center;
+                padding-left: 12px;
+                background: #f8fafc;
+            }
+
+            td:last-child:before {
+                content: "";
+            }
+
+            .btn-action {
+                padding: 10px 20px;
+                background: #eee;
+                border-radius: 5px;
+                margin: 5px;
+            }
         }
 
         .filter-select {
             width: 100%;
-            padding: 5px;
-            font-size: 10px;
-            border-radius: 4px;
+            padding: 8px;
+            border-radius: 6px;
             border: 1px solid #cbd5e1;
-            margin-top: 5px;
+            margin-bottom: 10px;
         }
 
         .btn-auth {
             background: var(--vivo-purple);
             color: white;
-            padding: 12px;
+            padding: 15px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
             font-weight: bold;
-            font-size: 14px;
         }
 
         input,
@@ -113,23 +177,15 @@
             border-radius: 8px;
             border: 1px solid #e2e8f0;
             width: 100%;
-            margin-bottom: 15px;
-            box-sizing: border-box;
+            margin-bottom: 10px;
         }
 
         .badge-status {
-            padding: 4px 8px;
-            border-radius: 10px;
+            padding: 5px 10px;
+            border-radius: 12px;
             font-weight: bold;
-            background: #eee;
-            font-size: 10px;
-        }
-
-        .btn-action {
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-size: 16px;
+            background: #e2e8f0;
+            font-size: 11px;
         }
     </style>
 </head>
@@ -138,54 +194,46 @@
 
     <div class="container">
         <div id="loginArea" class="login-box">
-            <div
-                style="background:var(--vivo-purple); color:white; width:50px; height:50px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin: 0 auto 15px; font-weight:bold; font-size:24px;">
-                V</div>
-            <h2 style="color: var(--vivo-purple); margin-bottom: 5px;">Portal Supervisor</h2>
-            <p style="color: #64748b; font-size: 13px; margin-bottom: 20px;">Validação de Presença Mensal</p>
-
+            <h2 style="color: var(--vivo-purple);">Portal Supervisor</h2>
             <select id="selectUF" onchange="filtrarSupervisoresPorUF()">
-                <option value="">Selecione a UF (RJ ou ES)</option>
+                <option value="">Selecione a UF...</option>
                 <option value="RJ">RJ</option>
                 <option value="ES">ES</option>
             </select>
-
             <select id="selectSupervisor">
                 <option value="">Selecione seu nome...</option>
             </select>
-
-            <input type="password" id="senhaSupervisor" placeholder="Senha de acesso">
+            <input type="password" id="senhaSupervisor" placeholder="Senha">
             <button class="btn-auth" onclick="autenticar()">ENTRAR</button>
         </div>
 
         <div id="reportArea" class="hidden">
             <header>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <div
-                        style="background:var(--vivo-purple); color:white; padding:5px 12px; border-radius:8px; font-weight:bold;">
-                        V</div>
-                    <div>
-                        <h1 style="margin:0; font-size: 1.1rem;">Painel de Validação</h1>
-                        <small id="nomeLogado" style="color: var(--vivo-purple); font-weight: bold;"></small>
-                    </div>
+                <div>
+                    <h1 style="margin:0; font-size: 1.2rem;">Painel de Validação</h1>
+                    <small id="nomeLogado"></small>
                 </div>
-
-                <div style="display:flex; gap:10px; align-items: center;">
-                    <select id="limiteRegistros" onchange="atualizarTabela()"
-                        style="margin-bottom:0; width: auto; padding: 8px;">
+                <div style="display:flex; gap:5px; flex-wrap: wrap;">
+                    <select id="limiteRegistros" onchange="atualizarTabela()" style="width: auto; margin-bottom:0;">
                         <option value="5">5 itens</option>
                         <option value="10" selected>10 itens</option>
-                        <option value="20">20 itens</option>
-                        <option value="1000">1000 itens</option>
+                        <option value="1000">Tudo</option>
                     </select>
-
                     <button onclick="exportarVisivelExcel()"
-                        style="background:var(--success); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold;">Exportar
-                        Filtro</button>
+                        style="background:var(--success); color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;">Exportar</button>
                     <button onclick="location.reload()"
-                        style="background:var(--danger); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">Sair</button>
+                        style="background:var(--danger); color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;">Sair</button>
                 </div>
             </header>
+
+            <div style="margin-bottom: 15px;">
+                <select class="filter-select" id="f_tec" onchange="filtrar()">
+                    <option value="">Filtrar Técnico: Todos</option>
+                </select>
+                <select class="filter-select" id="f_status" onchange="filtrar()">
+                    <option value="">Filtrar Status: Todos</option>
+                </select>
+            </div>
 
             <div class="table-responsive">
                 <table id="tabelaReport">
@@ -195,15 +243,11 @@
                             <th>EMPRESA</th>
                             <th>BUCKET</th>
                             <th>MATRÍCULA</th>
-                            <th>TÉCNICO <br><select class="filter-select" id="f_tec" onchange="filtrar()">
-                                    <option value="">Todos</option>
-                                </select></th>
+                            <th>TÉCNICO</th>
                             <th>SUPERVISOR</th>
                             <th>COORDENADOR</th>
                             <th>GERENTE</th>
-                            <th>STATUS <br><select class="filter-select" id="f_status" onchange="filtrar()">
-                                    <option value="">Todos</option>
-                                </select></th>
+                            <th>STATUS</th>
                             <th>AÇÕES</th>
                         </tr>
                     </thead>
@@ -215,7 +259,6 @@
 
     <script>
         const DB_KEY = 'base_presenca_v4_vivo';
-
         const baseDados = {
             // --- DADOS REAIS: RIO DE JANEIRO (RJ) ---
             "WILLIAMS DOS SANTOS FERREIRA": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 4", matricula: "03514505", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
@@ -269,46 +312,29 @@
         };
 
         const SENHA_GERAL = "123";
-        const SENHA_ADMIN = "admin";
         let dadosDoSupervisor = [];
 
-        // 1. Correlacionar Supervisores com a UF selecionada
         function filtrarSupervisoresPorUF() {
-            const ufSel = document.getElementById('selectUF').value;
-            const selectSup = document.getElementById('selectSupervisor');
-            selectSup.innerHTML = '<option value="">Selecione seu nome...</option>';
-
-            if (!ufSel) return;
-
-            const filtrados = [...new Set(Object.values(baseDados)
-                .filter(d => d.uf === ufSel)
-                .map(d => d.super))].sort();
-
-            filtrados.forEach(s => {
+            const uf = document.getElementById('selectUF').value;
+            const select = document.getElementById('selectSupervisor');
+            select.innerHTML = '<option value="">Selecione seu nome...</option>';
+            const sups = [...new Set(Object.values(baseDados).filter(d => d.uf === uf).map(d => d.super))].sort();
+            sups.forEach(s => {
                 let opt = document.createElement('option');
                 opt.value = s; opt.innerHTML = s;
-                selectSup.appendChild(opt);
+                select.appendChild(opt);
             });
-
-            if (ufSel === "RJ") {
-                let optAdmin = document.createElement('option');
-                optAdmin.value = "Max"; optAdmin.innerHTML = "ADMINISTRADOR (MAX)";
-                selectSup.appendChild(optAdmin);
-            }
         }
 
         function autenticar() {
             const sup = document.getElementById('selectSupervisor').value;
             const senha = document.getElementById('senhaSupervisor').value;
-
-            if (sup && (senha === SENHA_GERAL || senha === SENHA_ADMIN)) {
+            if (sup && senha === SENHA_GERAL) {
                 document.getElementById('loginArea').classList.add('hidden');
                 document.getElementById('reportArea').classList.remove('hidden');
-                document.getElementById('nomeLogado').innerText = "Supervisor: " + sup;
+                document.getElementById('nomeLogado').innerText = "Logado como: " + sup;
                 carregarRelatorio(sup);
-            } else {
-                alert("Acesso negado. Selecione o nome e digite a senha correta.");
-            }
+            } else { alert("Dados incorretos."); }
         }
 
         function carregarRelatorio(supervisorNome) {
@@ -316,36 +342,30 @@
             dadosDoSupervisor = (supervisorNome === "Max") ? db : db.filter(r => r.super === supervisorNome);
 
             const opTec = [...new Set(dadosDoSupervisor.map(r => r.tecnico))].sort();
-            const opStatus = [...new Set(dadosDoSupervisor.map(r => r.status))].sort();
-
-            document.getElementById('f_tec').innerHTML = '<option value="">Todos</option>' + opTec.map(t => `<option value="${t}">${t}</option>`).join('');
-            document.getElementById('f_status').innerHTML = '<option value="">Todos</option>' + opStatus.map(s => `<option value="${s}">${s}</option>`).join('');
+            document.getElementById('f_tec').innerHTML = '<option value="">Filtrar Técnico: Todos</option>' + opTec.map(t => `<option value="${t}">${t}</option>`).join('');
 
             atualizarTabela();
         }
 
-        function atualizarTabela() {
-            filtrar();
-        }
+        function atualizarTabela() { filtrar(); }
 
         function renderizarTabela(dados) {
             const limite = parseInt(document.getElementById('limiteRegistros').value);
-            const dadosExibicao = dados.slice(0, limite);
             const corpo = document.getElementById('corpoReport');
 
-            corpo.innerHTML = dadosExibicao.map(r => `
+            corpo.innerHTML = dados.slice(0, limite).map(r => `
                 <tr>
-                    <td>${r.uf}</td>
-                    <td>${r.empresa}</td>
-                    <td>${r.micro || r.bucket}</td>
-                    <td>${r.matricula}</td>
-                    <td><b>${r.tecnico}</b></td>
-                    <td>${r.super}</td>
-                    <td>${r.coord}</td>
-                    <td>${r.gerente}</td>
-                    <td><span class="badge-status">${r.status}</span></td>
+                    <td data-label="UF">${r.uf}</td>
+                    <td data-label="EMPRESA">${r.empresa}</td>
+                    <td data-label="BUCKET">${r.micro || r.bucket}</td>
+                    <td data-label="MATRÍCULA">${r.matricula}</td>
+                    <td data-label="TÉCNICO"><b>${r.tecnico}</b></td>
+                    <td data-label="SUPERVISOR">${r.super}</td>
+                    <td data-label="COORDENADOR">${r.coord}</td>
+                    <td data-label="GERENTE">${r.gerente}</td>
+                    <td data-label="STATUS"><span class="badge-status">${r.status}</span></td>
                     <td>
-                        <button class="btn-action" onclick="editarStatus('${r.id}')">✏️</button>
+                        <button class="btn-action" onclick="editarStatus('${r.id}')">✏️ Editar</button>
                         <button class="btn-action" onclick="excluir('${r.id}')">🗑️</button>
                     </td>
                 </tr>
@@ -355,60 +375,33 @@
         function filtrar() {
             const fTec = document.getElementById('f_tec').value;
             const fStatus = document.getElementById('f_status').value;
-
             const filtrados = dadosDoSupervisor.filter(r => {
-                return (fTec === "" || r.tecnico === fTec) &&
-                    (fStatus === "" || r.status === fStatus);
+                return (fTec === "" || r.tecnico === fTec) && (fStatus === "" || r.status === fStatus);
             });
             renderizarTabela(filtrados);
         }
 
-        // 3. Edição por números
         function editarStatus(id) {
-            const opcao = prompt("Escolha o novo Status:\n1-PRESENTE\n2-FALTA\n3-ATESTADO\n4-FOLGA\n5-FÉRIAS");
-
-            const mapaStatus = {
-                "1": "PRESENTE",
-                "2": "FALTA",
-                "3": "ATESTADO",
-                "4": "FOLGA",
-                "5": "FÉRIAS"
-            };
-
-            const novoStatus = mapaStatus[opcao];
-
-            if (novoStatus) {
+            const opcao = prompt("1-PRESENTE, 2-FALTA, 3-ATESTADO, 4-FOLGA, 5-FÉRIAS");
+            const mapa = { "1": "PRESENTE", "2": "FALTA", "3": "ATESTADO", "4": "FOLGA", "5": "FÉRIAS" };
+            if (mapa[opcao]) {
                 let db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
                 const i = db.findIndex(item => String(item.id) === String(id));
                 if (i !== -1) {
-                    db[i].status = novoStatus;
+                    db[i].status = mapa[opcao];
                     localStorage.setItem(DB_KEY, JSON.stringify(db));
                     carregarRelatorio(document.getElementById('selectSupervisor').value);
                 }
-            } else if (opcao !== null) {
-                alert("Opção inválida! Digite um número de 1 a 5.");
             }
         }
 
         function excluir(id) {
-            if (confirm("Excluir este lançamento?")) {
+            if (confirm("Excluir?")) {
                 let db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
                 db = db.filter(item => String(item.id) !== String(id));
                 localStorage.setItem(DB_KEY, JSON.stringify(db));
                 carregarRelatorio(document.getElementById('selectSupervisor').value);
             }
-        }
-
-        function exportarVisivelExcel() {
-            const limite = parseInt(document.getElementById('limiteRegistros').value);
-            const paraExportar = dadosDoSupervisor.slice(0, limite);
-
-            if (paraExportar.length === 0) return alert("Nada para exportar.");
-
-            const ws = XLSX.utils.json_to_sheet(paraExportar);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Validação");
-            XLSX.writeFile(wb, `Validacao_Supervisor.xlsx`);
         }
     </script>
 </body>
