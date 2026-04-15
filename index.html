@@ -19,14 +19,16 @@
             font-family: 'Segoe UI', sans-serif;
             background: var(--vivo-light);
             margin: 0;
-            padding: 20px;
+            padding: 10px;
+            /* Reduzido para telas menores */
         }
 
         .container {
             max-width: 1600px;
             margin: auto;
             background: white;
-            padding: 25px;
+            padding: 15px;
+            /* Ajustado */
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             border: 1px solid #e2e8f0;
@@ -39,6 +41,9 @@
             border-bottom: 2px solid var(--vivo-purple);
             padding-bottom: 20px;
             margin-bottom: 25px;
+            flex-wrap: wrap;
+            /* Permite quebrar linha no mobile */
+            gap: 15px;
         }
 
         .logo-area {
@@ -57,39 +62,35 @@
             justify-content: center;
             color: white;
             font-weight: bold;
+            flex-shrink: 0;
         }
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
             margin-bottom: 30px;
         }
 
         .db-card {
             background-color: white;
-            padding: 15px;
+            padding: 12px;
             border-radius: 12px;
             text-align: center;
             border: 1px solid #e2e8f0;
             border-top: 4px solid var(--vivo-purple);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .db-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
         }
 
         .db-card h3 {
             margin: 0;
-            font-size: 11px;
+            font-size: 10px;
             color: #64748b;
             text-transform: uppercase;
         }
 
         .db-card .value {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
             color: var(--vivo-purple);
         }
@@ -113,8 +114,10 @@
             cursor: pointer;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             border-radius: 8px;
             font-weight: bold;
+            font-size: 13px;
         }
 
         .list-container {
@@ -122,7 +125,7 @@
             background: #fff;
             padding: 15px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 10px;
             max-height: 250px;
             overflow-y: auto;
@@ -148,18 +151,21 @@
             border-spacing: 0;
             font-size: 11px;
             margin-top: 10px;
+            min-width: 800px;
+            /* Garante scroll horizontal em tabelas densas */
         }
 
         th {
             background: #f1f5f9;
             color: var(--vivo-purple);
-            padding: 15px;
+            padding: 12px;
             text-align: left;
             border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
         }
 
         td {
-            padding: 12px 15px;
+            padding: 10px 12px;
             border-bottom: 1px solid #f1f5f9;
         }
 
@@ -173,7 +179,7 @@
             width: 100%;
             cursor: pointer;
             font-size: 16px;
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
         .btn-success {
@@ -200,6 +206,7 @@
             padding: 10px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
+            font-size: 14px;
         }
 
         .controls-table {
@@ -207,11 +214,50 @@
             gap: 10px;
             margin-bottom: 10px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         #inputBusca {
             flex-grow: 1;
-            margin-bottom: 0;
+            min-width: 200px;
+        }
+
+        /* Ajustes de Responsividade */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .btn-success,
+            .btn-danger {
+                padding: 10px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .list-container {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                font-size: 11px;
+            }
         }
     </style>
 </head>
@@ -223,14 +269,14 @@
             <div class="logo-area">
                 <div class="logo-v">V</div>
                 <div>
-                    <h1 style="margin:0; font-size: 1.5rem;">Gestão de Presença</h1>
+                    <h1 style="margin:0; font-size: 1.3rem;">Gestão de Presença</h1>
                     <small style="color: #64748b;">Operacional Telefônica</small>
                 </div>
             </div>
-            <div style="display:flex; gap:10px; align-items:center;">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap: wrap;">
                 <input type="date" id="dataSelecionada" onchange="atualizarTabela()">
-                <button class="btn-success" onclick="exportarExcel()">Exportar Excel</button>
-                <button class="btn-danger" onclick="limparTudo()">Limpar Tudo</button>
+                <button class="btn-success" onclick="exportarExcel()">Exportar</button>
+                <button class="btn-danger" onclick="limparTudo()">Limpar</button>
             </div>
         </header>
 
@@ -263,30 +309,30 @@
             <div class="section-header">
                 <span>SELECIONAR COLABORADORES</span>
                 <button onclick="selectAll(true)"
-                    style="background:white; color:var(--vivo-purple); border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:2px 10px;">TODOS</button>
+                    style="background:white; color:var(--vivo-purple); border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:4px 10px;">TODOS</button>
             </div>
             <div id="colabSection" class="list-container">
                 <div id="listaTecnicos" style="display: contents;"></div>
             </div>
 
-            <div class="section-header">DEFINIR STATUS (PRESENTE LANÇA O MÊS TODO)</div>
-            <div id="statusRadios" style="grid-column: 1/-1; display:flex; gap:10px; flex-wrap:wrap;"></div>
+            <div class="section-header">DEFINIR STATUS</div>
+            <div id="statusRadios" style="grid-column: 1/-1; display:flex; gap:8px; flex-wrap:wrap;"></div>
 
             <button class="btn-primary" onclick="salvarPresenca()">EFETUAR LANÇAMENTO</button>
         </div>
 
         <div class="controls-table">
-            <input type="text" id="inputBusca" onkeyup="atualizarTabela()"
-                placeholder="🔍 Buscar por Nome ou Matrícula...">
+            <input type="text" id="inputBusca" onkeyup="atualizarTabela()" placeholder="🔍 Buscar Nome ou Matrícula...">
             <select id="limiteRegistros" onchange="atualizarTabela()">
-                <option value="5">Mostrar 5</option>
-                <option value="10">Mostrar 10</option>
-                <option value="20">Mostrar 20</option>
-                <option value="100">Mostrar 100</option>
+                <option value="5">Ver 5</option>
+                <option value="10">Ver 10</option>
+                <option value="20">Ver 20</option>
+                <option value="100">Ver 100</option>
+                <option value="1000">Ver 100</option>
             </select>
         </div>
 
-        <div style="overflow-x:auto;">
+        <div style="overflow-x:auto; border-radius: 8px; border: 1px solid #e2e8f0;">
             <table id="tabelaPresenca">
                 <thead>
                     <tr>
@@ -310,7 +356,6 @@
     <script>
         const DB_KEY = 'base_presenca_v4_vivo';
 
-        // Base de dados injetada com Coordenador e Gerente
         let baseDados = {
             "WILLIAMS DOS SANTOS FERREIRA": { uf: "RJ", empresa: "Telefonica", bucket: "ZONA SUL 4", matricula: "03514505", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
             "ADRIANO NUNES MARQUES": { uf: "RJ", empresa: "Telefonica", bucket: "ZONA SUL 4", matricula: "03523247", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
@@ -381,7 +426,7 @@
             document.getElementById('listaTecnicos').innerHTML = tecnicos.map(t => `
                 <label class="item-check">
                     <input type="checkbox" name="tec" value="${t}"> 
-                    <span>${t} (${baseDados[t].matricula})</span>
+                    <span>${t}</span>
                 </label>`).join('');
         }
 
@@ -426,26 +471,18 @@
             const dt = document.getElementById('dataSelecionada').value;
             const busca = document.getElementById('inputBusca').value.toUpperCase();
             const limite = parseInt(document.getElementById('limiteRegistros').value);
-
             let db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
 
-            // Filtro por Data e Busca (Nome/Matrícula)
-            let filtrados = db.filter(r => {
-                const matchData = r.data === dt;
-                const matchBusca = r.tecnico.toUpperCase().includes(busca) || r.matricula.includes(busca);
-                return matchData && matchBusca;
-            }).sort((a, b) => a.tecnico.localeCompare(b.tecnico));
+            let filtrados = db.filter(r => (r.data === dt) && (r.tecnico.toUpperCase().includes(busca) || r.matricula.includes(busca)))
+                .sort((a, b) => a.tecnico.localeCompare(b.tecnico));
 
-            // Atualiza Dashboard com o total filtrado da data (independente do limite visual)
             document.getElementById('count-uf').innerText = [...new Set(filtrados.map(r => r.uf))].length;
             document.getElementById('count-colab').innerText = filtrados.length;
             document.getElementById('count-super').innerText = [...new Set(filtrados.map(r => r.super))].length;
             document.getElementById('count-gerente').innerText = [...new Set(filtrados.map(r => r.gerente))].length;
             document.getElementById('count-empresa').innerText = [...new Set(filtrados.map(r => r.empresa))].length;
 
-            // Aplica limite visual (Paginação simples)
             const visualizados = filtrados.slice(0, limite);
-
             document.getElementById('corpoTabela').innerHTML = visualizados.map(r => `
                 <tr>
                     <td>${r.uf}</td>
@@ -472,7 +509,7 @@
         function selectAll(check) { document.querySelectorAll('input[name="tec"]').forEach(c => c.checked = check); }
 
         function limparTudo() {
-            if (confirm("Deseja apagar todos os registros do sistema?")) {
+            if (confirm("Apagar todos os registros?")) {
                 localStorage.removeItem(DB_KEY);
                 atualizarTabela();
             }
@@ -480,11 +517,11 @@
 
         function exportarExcel() {
             const db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
-            if (db.length === 0) return alert("Não há dados para exportar.");
+            if (db.length === 0) return alert("Sem dados.");
             const ws = XLSX.utils.json_to_sheet(db);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Presença");
-            XLSX.writeFile(wb, "Relatorio_Presenca.xlsx");
+            XLSX.writeFile(wb, "Relatorio.xlsx");
         }
     </script>
 </body>
