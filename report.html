@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validação Supervisor - Edição Campo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --vivo-purple: #660099;
+            --vivo-accent: #9b51e0;
+            --vivo-light: #F8F9FD;
+            --danger: #ff4757;
+            --success: #2ed573;
+            --text-main: #2f3542;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--vivo-light);
+            margin: 0;
+            padding: 10px;
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(102, 0, 153, 0.08);
+        }
+
+        /* --- ESTILO LOGIN --- */
+        .login-box {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 380px;
+            margin: 60px auto;
+            text-align: center;
+            border: 1px solid #f0f0f0;
+        }
+
+        .login-logo {
+            background: var(--vivo-purple);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-weight: bold;
+            font-size: 30px;
+            box-shadow: 0 8px 15px rgba(102, 0, 153, 0.3);
+        }
+
+        /* --- CABEÇALHO DO PAINEL --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .user-info h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--vivo-purple);
+        }
+
+        .user-info small {
+            color: #747d8c;
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* --- BOTÕES E INPUTS --- */
+        .btn {
+            border: none;
+            padding: 12px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn-purple {
+            background: var(--vivo-purple);
+            color: white;
+        }
+
+        .btn-purple:hover {
+            background: var(--vivo-accent);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ffeef0;
+            color: var(--danger);
+        }
+
+        select,
+        input {
+            padding: 14px;
+            border-radius: 12px;
+            border: 2px solid #edf2f7;
+            background: #f8fafc;
+            width: 100%;
+            margin-bottom: 15px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            border-color: var(--vivo-purple);
+        }
+
+        /* --- TABELA DESKTOP --- */
+        .table-responsive {
+            width: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 15px;
+            text-align: left;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #4b5563;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 11px;
+            background: #f1f2f6;
+            color: #57606f;
+        }
+
+        /* --- RESPONSIVIDADE (MODO CARD PARA CAMPO) --- */
+        @media screen and (max-width: 900px) {
+
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            tr {
+                margin-bottom: 20px;
+                border-radius: 18px;
+                border: 1px solid #eee;
+                overflow: hidden;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            }
+
+            td {
+                border: none;
+                border-bottom: 1px solid #f9f9f9;
+                position: relative;
+                padding-left: 45%;
+                text-align: right;
+                min-height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+            }
+
+            td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 15px;
+                font-weight: 800;
+                color: var(--vivo-purple);
+                font-size: 12px;
+                text-transform: uppercase;
+            }
+
+            td:last-child {
+                background: #fdfaff;
+                justify-content: center;
+                padding: 15px;
+                gap: 20px;
+            }
+
+            td:last-child:before {
+                content: "";
+            }
+
+            .btn-action-mobile {
+                padding: 10px 25px;
+                border-radius: 10px;
+                font-size: 16px !important;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div id="loginArea" class="login-box">
+            <div class="login-logo">V</div>
+            <h2 style="color: var(--vivo-purple); margin-top: 0;">Portal Supervisor</h2>
+            <p style="color: #a4b0be; margin-bottom: 30px;">Acesse para validar as presenças</p>
+
+            <select id="selectUF" onchange="filtrarSupervisoresPorUF()">
+                <option value="">1º Selecione a UF (RJ / ES)</option>
+                <option value="RJ">Rio de Janeiro (RJ)</option>
+                <option value="ES">Espírito Santo (ES)</option>
+            </select>
+
+            <select id="selectSupervisor">
+                <option value="">2º Selecione seu nome...</option>
+            </select>
+
+            <input type="password" id="senhaSupervisor" placeholder="Senha de acesso">
+            <button class="btn btn-purple" style="width: 100%; justify-content: center;" onclick="autenticar()">ENTRAR
+                NO PAINEL</button>
+        </div>
+
+        <div id="reportArea" class="hidden">
+            <header>
+                <div class="user-info">
+                    <h1>Painel de Controle</h1>
+                    <small id="nomeLogado"></small>
+                </div>
+
+                <div class="header-actions">
+                    <div
+                        style="display:flex; align-items:center; background:#f1f2f6; padding:5px 10px; border-radius:12px;">
+                        <span style="font-size:12px; font-weight:bold; margin-right:8px;">Ver:</span>
+                        <select id="limiteRegistros" onchange="atualizarTabela()"
+                            style="margin-bottom:0; padding:5px; border:none; background:transparent; width:auto;">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="1000">Tudo</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-success" onclick="exportarVisivelExcel()">📦 Exportar</button>
+                    <button class="btn btn-danger" onclick="location.reload()">Sair</button>
+                </div>
+            </header>
+
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 20px;">
+                <select id="f_tec" onchange="filtrar()" style="margin-bottom:0;">
+                    <option value="">Todos os Técnicos</option>
+                </select>
+                <select id="f_status" onchange="filtrar()" style="margin-bottom:0;">
+                    <option value="">Todos os Status</option>
+                </select>
+            </div>
+
+            <div class="table-responsive">
+                <table id="tabelaReport">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>UF</th>
+                            <th>Bucket</th>
+                            <th>Matrícula</th>
+                            <th>Técnico</th>
+                            <th>Supervisor</th>
+                            <th>Coordenador</th>
+                            <th>Gerente</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpoReport"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DB_KEY = 'base_presenca_v4_vivo';
+
+        const baseDados = {
+            // --- DADOS REAIS: RIO DE JANEIRO (RJ) ---
+            "WILLIAMS DOS SANTOS FERREIRA": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 4", matricula: "03514505", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "ADRIANO NUNES MARQUES": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 4", matricula: "03523247", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "ANDRE LIMA DA SILVA": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 4", matricula: "00097616", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "MARCOS AURELIO JESUS DE OLIVEIRA": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 4", matricula: "00071346", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "WILLIAN ARAUJO CIPRIANO CAMPOS": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 4", matricula: "00069044", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "RAFAEL TOLEDO": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 4", matricula: "00100805", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "MARCOS PAULO BATISTA DA CONCEICAO PERES": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 4", matricula: "00162887", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "DELEON RAMON DIAS DE OLIVEIRA": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 4", matricula: "03537087", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "MARCOS PAULO DA SILVA DE ABREU": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 4", matricula: "00098911", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "WELLINGTON ALVES DE SOUZA": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 4", matricula: "03533573", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "VICTOR DIEGO DE OLIVEIRA": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 1", matricula: "00072840", super: "MARCELO ANTUNES DO ESPIRITO SANTO BARRETO", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "WILLIAN DOMINGOS RICARDO": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 1", matricula: "00100730", super: "MARCELO ANTUNES DO ESPIRITO SANTO BARRETO", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "GABRIEL DOS SANTOS SILVA": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 1", matricula: "03552297", super: "MARCELO ANTUNES DO ESPIRITO SANTO BARRETO", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "FABIO MARTINIANO DA VEIGA": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 1", matricula: "00095234", super: "MARCELO ANTUNES DO ESPIRITO SANTO BARRETO", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "CARLOS ALBERTO DA CONCEICAO LAGE": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 1", matricula: "03525166", super: "ROBERTA DOS RAMOS SANTOS", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "LAERTE LINS DE SOUSA RODRIGUES": { uf: "RJ", empresa: "Telefonica", micro: "N/A", matricula: "00145379", super: "LINCOLN BEHRENDS DOS SANTOS", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "FRANCISCO DURVAL LINHARES": { uf: "RJ", empresa: "Telefonica", micro: "BARRA 01", matricula: "03555126", super: "LUCAS ELIZEU SOUZA DE MORAES", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "CARLOS ALBERTO RIBEIRO": { uf: "RJ", empresa: "Telefonica", micro: "BARRA 01", matricula: "00081401", super: "ELIZEU SOUZA DE MORAES", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "CLAUDIO DA SILVA CUBA": { uf: "RJ", empresa: "Telefonica", micro: "BARRA 01", matricula: "00113160", super: "ELIZEU SOUZA DE MORAES", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "JAQUELINE ALVES BATISTA DE OLIVEIRA": { uf: "RJ", empresa: "Telefonica", micro: "BARRA 01", matricula: "03546537", super: "ELIZEU SOUZA DE MORAES", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "WESLEI NUNES DE MELO": { uf: "RJ", empresa: "Telefonica", micro: "BARRA 01", matricula: "03546617", super: "ELIZEU SOUZA DE MORAES", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "MARCELO LIMA BEJARANO": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 3", matricula: "00097554", super: "ROBERTA DOS RAMOS SANTOS", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "RAFAEL DA SILVA RODRIGUES": { uf: "RJ", empresa: "Telefonica", micro: "N/A", matricula: "00136862", super: "JEAN CARLOS TORRES BRAGA SILVA", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "WANDERSON CARVALHO DA MATTA": { uf: "RJ", empresa: "Telefonica", micro: "N/A", matricula: "00095297", super: "JEAN CARLOS TORRES BRAGA SILVA", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "MARCOS PAULO LARIU BORGES": { uf: "RJ", empresa: "Telefonica", micro: "N/A", matricula: "03552283", super: "JEAN CARLOS TORRES BRAGA SILVA", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "WELLINGTON PEREIRA MATTOS LEIROZ": { uf: "RJ", empresa: "Telefonica", micro: "BARRA 2", matricula: "00118400", super: "DOUGLAS MANHAES LIMA", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "EDUARDO LUIS DA SILVA": { uf: "RJ", empresa: "Telefonica", micro: "BARRA 2", matricula: "00097601", super: "DOUGLAS MANHAES LIMA", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "JOSE NUNES DOS SANTOS": { uf: "RJ", empresa: "Telefonica", micro: "BARRA 2", matricula: "00120323", super: "DOUGLAS MANHAES LIMA", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "JOAO PEDRO PONTES MARUCHE": { uf: "RJ", empresa: "Telefonica", micro: "BARRA 2", matricula: "00161842", super: "DOUGLAS MANHAES LIMA", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "RODRIGO BRAGA FERNANDES": { uf: "RJ", empresa: "Telefonica", micro: "BARRA 2", matricula: "00096019", super: "DOUGLAS MANHAES LIMA", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "CLEYSON FERNANDO MODESTO RIBEIRO": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 2", matricula: "03533592", super: "ADENILTON DA SILVA JUNIOR", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "NIVALDO DE OLIVEIRA PINHEIRO": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 2", matricula: "00060118", super: "ADENILTON DA SILVA JUNIOR", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+            "ALAN DE OLIVEIRA DA ROCHA CARVALHO": { uf: "RJ", empresa: "Telefonica", micro: "ZONA SUL 2", matricula: "00096188", super: "ADENILTON DA SILVA JUNIOR", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
+
+            // --- DADOS FICTÍCIOS: ESPÍRITO SANTO (ES) ---
+            "RICARDO ALMEIDA SANTOS": { uf: "ES", empresa: "Telefonica", micro: "VITORIA 1", matricula: "03612244", super: "FABRICIO SILVA", coord: "ALAN MENDES", gerente: "SERGIO FREITAS" },
+            "THIAGO MONTEIRO": { uf: "ES", empresa: "Telefonica", micro: "VITORIA 1", matricula: "03615588", super: "FABRICIO SILVA", coord: "ALAN MENDES", gerente: "SERGIO FREITAS" },
+            "MARCOS PAULO VAREJAO": { uf: "ES", empresa: "Telefonica", micro: "VITORIA 2", matricula: "03615599", super: "FABRICIO SILVA", coord: "ALAN MENDES", gerente: "SERGIO FREITAS" },
+            "LUCAS REIS SOUZA": { uf: "ES", empresa: "Telefonica", micro: "VILA VELHA 1", matricula: "03617722", super: "RODRIGO FARIA", coord: "ALINE SOUZA", gerente: "SERGIO FREITAS" },
+            "BRUNO FARIAS DE OLIVEIRA": { uf: "ES", empresa: "Telefonica", micro: "VILA VELHA 1", matricula: "03618833", super: "RODRIGO FARIA", coord: "ALINE SOUZA", gerente: "SERGIO FREITAS" },
+            "JULIANA COSTA PINTO": { uf: "ES", empresa: "Telefonica", micro: "VILA VELHA 2", matricula: "03624414", super: "RODRIGO FARIA", coord: "ALINE SOUZA", gerente: "SERGIO FREITAS" },
+            "CAMILA MARTINS LEITE": { uf: "ES", empresa: "Telefonica", micro: "SERRA 1", matricula: "03624420", super: "GUSTAVO NOBRE", coord: "ALINE SOUZA", gerente: "SERGIO FREITAS" },
+            "FERNANDO ALVES FILHO": { uf: "ES", empresa: "Telefonica", micro: "SERRA 1", matricula: "03624455", super: "GUSTAVO NOBRE", coord: "ALINE SOUZA", gerente: "SERGIO FREITAS" },
+            "DANIELA VIANA GOMES": { uf: "ES", empresa: "Telefonica", micro: "SERRA 2", matricula: "03624426", super: "GUSTAVO NOBRE", coord: "ALINE SOUZA", gerente: "SERGIO FREITAS" },
+            "LEONARDO LUZ MOURA": { uf: "ES", empresa: "Telefonica", micro: "CARIACICA 1", matricula: "03624429", super: "PATRICIA LOPES", coord: "ALAN MENDES", gerente: "SERGIO FREITAS" },
+            "IGOR CARDOSO MATTOS": { uf: "ES", empresa: "Telefonica", micro: "CARIACICA 1", matricula: "03624435", super: "PATRICIA LOPES", coord: "ALAN MENDES", gerente: "SERGIO FREITAS" },
+            "CAROLINE DUARTE": { uf: "ES", empresa: "Telefonica", micro: "LINHARES", matricula: "03624438", super: "CARLOS MAGNO", coord: "ALAN MENDES", gerente: "SERGIO FREITAS" },
+            "ROBERTO DIAS JUNIOR": { uf: "ES", empresa: "Telefonica", micro: "CACHOEIRO", matricula: "03624499", super: "CARLOS MAGNO", coord: "ALAN MENDES", gerente: "SERGIO FREITAS" }
+        };
+
+        const SENHA_GERAL = "123";
+        let dadosDoSupervisor = [];
+
+        // Função para formatar data em PT-BR
+        function formatarDataBR(dataString) {
+            if (!dataString || dataString === '---') return '---';
+            try {
+                // Tenta converter se for objeto Date ou string ISO
+                const date = new Date(dataString);
+                if (isNaN(date.getTime())) return dataString; // Se já estiver formatado, retorna original
+                return date.toLocaleDateString('pt-BR');
+            } catch (e) {
+                return dataString;
+            }
+        }
+
+        function filtrarSupervisoresPorUF() {
+            const uf = document.getElementById('selectUF').value;
+            const select = document.getElementById('selectSupervisor');
+            select.innerHTML = '<option value="">2º Selecione seu nome...</option>';
+
+            const sups = [...new Set(Object.values(baseDados).filter(d => d.uf === uf).map(d => d.super))].sort();
+            sups.forEach(s => {
+                let opt = document.createElement('option');
+                opt.value = s; opt.innerHTML = s;
+                select.appendChild(opt);
+            });
+        }
+
+        function autenticar() {
+            const sup = document.getElementById('selectSupervisor').value;
+            const senha = document.getElementById('senhaSupervisor').value;
+            if (sup && (senha === SENHA_GERAL || senha === "admin")) {
+                document.getElementById('loginArea').classList.add('hidden');
+                document.getElementById('reportArea').classList.remove('hidden');
+                document.getElementById('nomeLogado').innerText = "Supervisor: " + sup;
+                carregarRelatorio(sup);
+            } else { alert("Verifique os dados e a senha."); }
+        }
+
+        function carregarRelatorio(supervisorNome) {
+            const db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+            dadosDoSupervisor = (supervisorNome === "Max" || supervisorNome.includes("ADMIN")) ? db : db.filter(r => r.super === supervisorNome);
+
+            const opTec = [...new Set(dadosDoSupervisor.map(r => r.tecnico))].sort();
+            document.getElementById('f_tec').innerHTML = '<option value="">Filtrar Técnico: Todos</option>' + opTec.map(t => `<option value="${t}">${t}</option>`).join('');
+
+            const opStatus = ["PRESENTE", "FALTA", "ATESTADO", "FOLGA", "FÉRIAS"];
+            document.getElementById('f_status').innerHTML = '<option value="">Filtrar Status: Todos</option>' + opStatus.map(s => `<option value="${s}">${s}</option>`).join('');
+
+            renderizarTabela(dadosDoSupervisor);
+        }
+
+        function renderizarTabela(dados) {
+            const limite = parseInt(document.getElementById('limiteRegistros').value);
+            const corpo = document.getElementById('corpoReport');
+
+            corpo.innerHTML = dados.slice(0, limite).map(r => `
+                <tr>
+                    <td data-label="Data">${formatarDataBR(r.data)}</td>
+                    <td data-label="UF">${r.uf}</td>
+                    <td data-label="Bucket">${r.micro || r.bucket}</td>
+                    <td data-label="Matrícula">${r.matricula}</td>
+                    <td data-label="Técnico"><b>${r.tecnico}</b></td>
+                    <td data-label="Supervisor">${r.super}</td>
+                    <td data-label="Coordenador">${r.coord}</td>
+                    <td data-label="Gerente">${r.gerente}</td>
+                    <td data-label="Status"><span class="badge">${r.status}</span></td>
+                    <td>
+                        <button class="btn btn-purple btn-action-mobile" onclick="editarStatus('${r.id}')">✏️</button>
+                        <button class="btn btn-danger btn-action-mobile" onclick="excluir('${r.id}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filtrar() {
+            const fTec = document.getElementById('f_tec').value;
+            const fStatus = document.getElementById('f_status').value;
+            const filtrados = dadosDoSupervisor.filter(r => {
+                return (fTec === "" || r.tecnico === fTec) && (fStatus === "" || r.status === fStatus);
+            });
+            renderizarTabela(filtrados);
+        }
+
+        function atualizarTabela() { filtrar(); }
+
+        function editarStatus(id) {
+            const opcao = prompt("Digite o número do novo Status:\n1-PRESENTE\n2-FALTA\n3-ATESTADO\n4-FOLGA\n5-FÉRIAS");
+            const mapa = { "1": "PRESENTE", "2": "FALTA", "3": "ATESTADO", "4": "FOLGA", "5": "FÉRIAS" };
+
+            if (mapa[opcao]) {
+                let db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+                const i = db.findIndex(item => String(item.id) === String(id));
+                if (i !== -1) {
+                    db[i].status = mapa[opcao];
+                    localStorage.setItem(DB_KEY, JSON.stringify(db));
+                    carregarRelatorio(document.getElementById('selectSupervisor').value);
+                    alert("Status atualizado!");
+                }
+            } else if (opcao) { alert("Opção inválida."); }
+        }
+
+        function excluir(id) {
+            if (confirm("Deseja realmente excluir este registro?")) {
+                let db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+                db = db.filter(item => String(item.id) !== String(id));
+                localStorage.setItem(DB_KEY, JSON.stringify(db));
+                carregarRelatorio(document.getElementById('selectSupervisor').value);
+            }
+        }
+
+        function exportarVisivelExcel() {
+            const limite = parseInt(document.getElementById('limiteRegistros').value);
+            const dadosExport = dadosDoSupervisor.slice(0, limite);
+            const ws = XLSX.utils.json_to_sheet(dadosExport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Validacao");
+            XLSX.writeFile(wb, "Relatorio_Presenca.xlsx");
+        }
+    </script>
+</body>
+
+</html>
