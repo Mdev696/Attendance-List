@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analítico Operacional - Dashboard KPI</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #348ddb;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --rj-color: #2980b9;
+            --es-color: #e67e22;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .filtro-box {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #dcdde1;
+        }
+
+        input[type="date"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-bottom: 20px;
+        }
+
+        th {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        .header-rj {
+            background-color: var(--rj-color);
+        }
+
+        .header-es {
+            background-color: var(--es-color);
+        }
+
+        td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .txt-pr {
+            color: var(--success);
+        }
+
+        .txt-f {
+            color: var(--danger);
+        }
+
+        .txt-fo {
+            color: var(--warning);
+        }
+
+        .txt-fe {
+            color: var(--accent);
+        }
+
+        .txt-inss {
+            color: #576574;
+        }
+
+        .txt-abs {
+            color: #8e44ad;
+            font-size: 20px;
+            background: #f8f0fb;
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+
+        .btn-voltar {
+            background: var(--secondary);
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .aviso-migracao {
+            background: #fff4e5;
+            border: 1px solid var(--warning);
+            color: #8a5a00;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Analítico de Indicadores KPI por UF</h1>
+            <div style="display: flex; gap: 10px;">
+                <a href="index.html" class="btn-voltar">⬅ Voltar</a>
+
+            </div>
+        </header>
+
+        <div class="filtro-box">
+            <strong>Data de Referência:</strong>
+            <input type="date" id="dataFiltro" onchange="gerarAnalise()">
+        </div>
+
+        <div id="avisoRegiao"></div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>UF</th>
+                        <th>Efetivo</th>
+                        <th>Desligado</th>
+                        <th>PR Σx M-1</th>
+                        <th>PR Σx W-1</th>
+                        <th>PR D-1</th>
+                        <th>N/A</th>
+                        <th>PR (Presença)</th>
+                        <th>F (Falta)</th>
+                        <th>FO (Folga)</th>
+                        <th>FE (Férias)</th>
+                        <th>INSS</th>
+                        <th>INTJ</th>
+                        <th>ABS</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://xuairybzhetuwvivblaq.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1YWlyeWJ6aGV0dXd2aXZibGFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0NzYwMzIsImV4cCI6MjEwMjA1MjAzMn0.oy5zWtGHdK6WV4mYRXJ5vjpwqHbNMo1fVil1diimT_g';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Mapa dos 4 códigos exibidos na tabela para a "regiao" real gravada
+        // pelo Painel de Presença (fase 1) em cada registro.
+        const REGIOES = {
+            'RJC': 'RJ_CAPITAL',
+            'RJI': 'RJ_INTERIOR',
+            'ESC': 'ES_CAPITAL',
+            'ESI': 'ES_INTERIOR'
+        };
+
+        // ==========================================================
+        // EFETIVO FIXO POR REGIÃO — altere os números abaixo manualmente
+        // sempre que o headcount de cada região mudar.
+        // (valores atuais conferem com o cadastro de colaboradores em 12/08/2026)
+        // ==========================================================
+        const efetivoFixoUF = {
+            'RJC': 65,  // RJ Capital
+            'RJI': 57,  // RJ Interior
+            'ESC': 24,  // ES Capital
+            'ESI': 18   // ES Interior
+        };
+
+        async function gerarAnalise() {
+            const dataSelecionada = document.getElementById('dataFiltro').value;
+            const mesPrefixo = dataSelecionada.substring(0, 7);
+            const corpo = document.getElementById('corpoTabela');
+            const avisoDiv = document.getElementById('avisoRegiao');
+            corpo.innerHTML = "<tr><td colspan='14'>Sincronizando dados regionais...</td></tr>";
+
+            const { data: registros, error } = await _supabase.from('registros_presenca').select('*');
+            if (error) return;
+
+            // Registros antigos que ainda não têm "regiao" preenchida (gravados antes
+            // da migração) não entram na contagem — avisa para rodar a migração no banco.
+            const semRegiao = (registros || []).filter(r => !r.regiao).length;
+            avisoDiv.innerHTML = semRegiao > 0
+                ? `<div class="aviso-migracao">⚠️ ${semRegiao} registro(s) sem região definida e não entram nesta tabela. Rode a migração "migracao_regiao.sql" para corrigi-los.</div>`
+                : "";
+
+            const ufsExibidos = ['RJC', 'RJI', 'ESC', 'ESI'];
+            let htmlFinal = "";
+
+            ufsExibidos.forEach(ufExibido => {
+                const regiaoReal = REGIOES[ufExibido];
+                const registrosUF = registros.filter(r => (r.regiao || "").trim().toUpperCase() === regiaoReal);
+                const efetivoFixo = efetivoFixoUF[ufExibido] || 0;
+
+                const registrosDoMesUF = registrosUF.filter(r => r.data && r.data.startsWith(mesPrefixo) && r.data <= dataSelecionada);
+                const diasUnicosUF = [...new Set(registrosDoMesUF.map(r => r.data))];
+                const totalDiasUF = diasUnicosUF.length || 1;
+
+                let kpi = { pr_visual: 0, f: 0, fo: 0, fe: 0, intj_visual: 0, inss: 0, desl: 0, prD1: 0, sw1: 0, sm1: 0 };
+
+                const d1_str = new Date(new Date(dataSelecionada + "T12:00:00").getTime() - 86400000).toISOString().split('T')[0];
+                const w_limite = new Date(new Date(dataSelecionada + "T12:00:00").getTime() - (7 * 86400000));
+
+                registrosUF.forEach(r => {
+                    const status = r.status ? r.status.trim().toUpperCase() : "";
+                    const rData = r.data;
+                    const rDataObj = new Date(rData + "T12:00:00");
+
+                    const ehINTJ = status.includes("INTERJORNADA") || status === "INTJ";
+                    const ehPR_Puro = status.includes("PRESENTE") || status.includes("NOTURNO") || status.includes("INTERMEDIARIO") || status.includes("INTERMEDIÁRIO");
+
+                    // Lógica de trabalho para ABS (Interjornada conta como trabalho, não falta)
+                    const contaComoTrabalhoParaABS = ehPR_Puro || ehINTJ;
+
+                    const ehDesl = status.includes("DESLIGADO");
+                    const ehFalta = status.includes("FALTA") || status.includes("ATESTADO") || status.includes("DUPLADO") || status.includes("FROTA");
+                    const ehFO = status.includes("FOLGA") || status === "FO";
+                    const ehFE = status.includes("FÉRIAS") || status.includes("FERIAS") || status === "FE";
+                    const ehINSS = status.includes("INSS");
+
+                    if (rData === dataSelecionada) {
+                        if (ehPR_Puro) kpi.pr_visual++;
+                        if (ehINTJ) kpi.intj_visual++;
+                        if (ehDesl) kpi.desl++;
+                        if (ehFalta) kpi.f++;
+                        if (ehFO) kpi.fo++;
+                        if (ehFE) kpi.fe++;
+                        if (ehINSS) kpi.inss++;
+                    }
+
+                    if (contaComoTrabalhoParaABS) {
+                        if (rData === d1_str) kpi.prD1++;
+                        if (rDataObj > w_limite && rDataObj <= new Date(dataSelecionada + "T12:00:00")) kpi.sw1++;
+                        if (rData.startsWith(mesPrefixo) && rData <= dataSelecionada) kpi.sm1++;
+                    }
+                });
+
+                const registrosNoDia = registrosUF.filter(r => r.data === dataSelecionada).length;
+                const naoLancados = Math.max(0, efetivoFixo - registrosNoDia);
+                const somaAusencias = kpi.f + kpi.desl + kpi.fo + kpi.fe + kpi.inss;
+                const valorABS = efetivoFixo > 0 ? ((somaAusencias / efetivoFixo) * 100).toFixed(2) : "0.00";
+
+                // Cor baseada se é RJ ou ES
+                const classeCor = ufExibido.startsWith('RJ') ? 'header-rj' : 'header-es';
+
+                htmlFinal += `
+            <tr>
+                <td class="${classeCor}" style="color:white; font-size: 16px;">${ufExibido}</td>
+                <td>${efetivoFixo}</td>
+                <td style="color: var(--danger);">${kpi.desl}</td>
+                <td>${(kpi.sm1 / totalDiasUF).toFixed(1)}</td>
+                <td>${(kpi.sw1 / 7).toFixed(1)}</td>
+                <td>${kpi.prD1}</td>
+                <td style="color: #7f8c8d;">${naoLancados}</td>
+                <td class="txt-pr">${kpi.pr_visual}</td>
+                <td class="txt-f">${kpi.f}</td>
+                <td class="txt-fo">${kpi.fo}</td>
+                <td class="txt-fe">${kpi.fe}</td>
+                <td class="txt-inss">${kpi.inss}</td>
+                <td>${kpi.intj_visual}</td>
+                <td><span class="txt-abs">${valorABS}%</span></td>
+            </tr>
+        `;
+            });
+            corpo.innerHTML = htmlFinal;
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('dataFiltro').value = new Date().toISOString().split('T')[0];
+            gerarAnalise();
+        });
+    </script>
+</body>
+
+</html>

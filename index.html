@@ -5,477 +5,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Presença - Operacional</title>
+    <script>
+        // Aplica o tema salvo antes de renderizar, evitando "flash" de tema errado
+        (function () {
+            const temaSalvo = localStorage.getItem('tema') ||
+                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', temaSalvo);
+        })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        :root {
-            --vivo-purple: #660099;
-            --vivo-orange: #FF6600;
-            --vivo-light: #F2F2F2;
-            --danger: #e74c3c;
-            --success: #27ae60;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: var(--vivo-light);
-            margin: 0;
-            padding: 10px;
-            /* Reduzido para dar mais espaço em telas pequenas */
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: auto;
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e2e8f0;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--vivo-purple);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            /* Permite quebrar linha no mobile */
-            gap: 10px;
-        }
-
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo-v {
-            width: 35px;
-            height: 35px;
-            background: var(--vivo-purple);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .db-card {
-            background-color: white;
-            padding: 12px;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid #e2e8f0;
-            border-top: 4px solid var(--vivo-purple);
-        }
-
-        .db-card h3 {
-            margin: 0;
-            font-size: 10px;
-            color: #64748b;
-            text-transform: uppercase;
-        }
-
-        .db-card .value {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--vivo-purple);
-        }
-
-        .add-box {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .section-header {
-            grid-column: 1 / -1;
-            background: var(--vivo-purple);
-            color: white;
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 12px;
-        }
-
-        .list-container {
-            grid-column: 1 / -1;
-            background: #fff;
-            padding: 10px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-        }
-
-        .item-check {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            border: 1px solid #e2e8f0;
-            font-size: 11px;
-        }
-
-        /* TABELA RESPONSIVA */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            /* Scroll horizontal no mobile */
-            -webkit-overflow-scrolling: touch;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-            min-width: 900px;
-        }
-
-        th {
-            background: #f1f5f9;
-            color: var(--vivo-purple);
-            padding: 12px;
-            text-align: left;
-            border-bottom: 2px solid #e2e8f0;
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 10px;
-            border-bottom: 1px solid #f1f5f9;
-            white-space: nowrap;
-        }
-
-        .btn-primary {
-            background: var(--vivo-purple);
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            border: none;
-            width: 100%;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        input,
-        select {
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            font-size: 13px;
-        }
-
-        .controls-table {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        #inputBusca {
-            flex-grow: 1;
-        }
-
-        /* Media Query para Celulares Pequenos */
-        @media (max-width: 600px) {
-            .dashboard-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            header {
-                justify-content: center;
-                text-align: center;
-            }
-
-            .logo-area {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .header-actions {
-                width: 100%;
-                justify-content: center;
-                display: flex;
-                gap: 5px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-
-    <div class="container">
-        <header>
-            <div class="logo-area">
-                <div class="logo-v">V</div>
-                <div>
-                    <h1 style="margin:0; font-size: 1.2rem;">Gestão de Presença</h1>
-                    <small style="color: #64748b;">Operacional Telefônica</small>
-                </div>
-            </div>
-            <div class="header-actions" style="display:flex; gap:8px; align-items:center;">
-                <input type="date" id="dataSelecionada" onchange="atualizarTabela()">
-                <button class="btn-success" onclick="exportarExcel()">Excel</button>
-                <button class="btn-danger" onclick="limparTudo()">Limpar</button>
-            </div>
-        </header>
-
-        <div class="dashboard-grid">
-            <div class="db-card">
-                <h3>UF</h3><span class="value" id="count-uf">0</span>
-            </div>
-            <div class="db-card">
-                <h3>Empresas</h3><span class="value" id="count-empresa">0</span>
-            </div>
-            <div class="db-card">
-                <h3>Técnicos</h3><span class="value" id="count-colab">0</span>
-            </div>
-            <div class="db-card">
-                <h3>Supervisores</h3><span class="value" id="count-super">0</span>
-            </div>
-            <div class="db-card">
-                <h3>Gerentes</h3><span class="value" id="count-gerente">0</span>
-            </div>
-        </div>
-
-        <div class="add-box">
-            <select id="filtroUf" onchange="popularSupervisores()">
-                <option value="">Filtro por UF</option>
-            </select>
-            <select id="filtroSuper" onchange="popularTecnicos()">
-                <option value="">Filtro por Supervisor</option>
-            </select>
-
-            <div class="section-header">
-                <span>SELECIONAR COLABORADORES</span>
-                <button onclick="selectAll(true)"
-                    style="background:white; color:var(--vivo-purple); border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:2px 8px;">TODOS</button>
-            </div>
-            <div id="colabSection" class="list-container">
-                <div id="listaTecnicos" style="display: contents;"></div>
-            </div>
-
-            <div class="section-header">DEFINIR STATUS (LANÇA O MÊS TODO)</div>
-            <div id="statusRadios" style="grid-column: 1/-1; display:flex; gap:8px; flex-wrap:wrap;"></div>
-
-            <button class="btn-primary" onclick="salvarPresenca()">EFETUAR LANÇAMENTO</button>
-        </div>
-
-        <div class="controls-table">
-            <input type="text" id="inputBusca" onkeyup="atualizarTabela()"
-                placeholder="🔍 Buscar por Nome ou Matrícula...">
-            <select id="limiteRegistros" onchange="atualizarTabela()">
-                <option value="10">10 itens</option>
-                <option value="20">20 itens</option>
-                <option value="30">30 itens</option>
-                <option value="100">100 itens</option>
-            </select>
-        </div>
-
-        <div class="table-responsive">
-            <table id="tabelaPresenca">
-                <thead>
-                    <tr>
-                        <th>UF</th>
-                        <th>EMPRESA</th>
-                        <th>BUCKET</th>
-                        <th>MATRÍCULA</th>
-                        <th>TÉCNICO</th>
-                        <th>SUPERVISOR</th>
-                        <th>COORDENADOR</th>
-                        <th>GERENTE</th>
-                        <th>STATUS</th>
-                        <th>AÇÕES</th>
-                    </tr>
-                </thead>
-                <tbody id="corpoTabela"></tbody>
-            </table>
+    <div id="login-view">
+        <div class="login-card">
+            <img src="tel.jpg" alt="Logo TLP" class="login-logo">
+            <h2 style="color: var(--primary); margin-bottom: 20px;">Acesso Restrito</h2>
+            <input type="email" id="login-user" placeholder="E-mail">
+            <input type="password" id="login-pass" placeholder="Senha">
+            <button class="btn-entrar" onclick="realizarLogin()">ENTRAR</button>
+            <p id="login-error" style="color:red; font-size: 12px; margin-top: 10px;"></p>
         </div>
     </div>
 
-    <script>
-        const DB_KEY = 'base_presenca_v4_vivo';
+    <div id="dashboard-view" class="hidden">
+        <div class="container">
+            <header>
+                <h1>Painel de Presença Operacional</h1>
+                <div class="header-actions">
+                    <label>📅 Data: </label>
+                    <input type="date" id="dataSelecionada" onchange="atualizarTabela()" style="width: auto;">
+                    <button class="theme-toggle" id="themeToggleBtn" onclick="alternarTema()"
+                        title="Alternar tema claro/escuro">🌙</button>
+                    <a href="analise.html" class="link-analitico">Analítico</a>
+                    <button class="btn-logout" onclick="realizarLogout()">Sair</button>
+                </div>
+            </header>
 
-        let baseDados = {
-            "WILLIAMS DOS SANTOS FERREIRA": { uf: "RJ", empresa: "Telefonica", bucket: "ZONA SUL 4", matricula: "03514505", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "ADRIANO NUNES MARQUES": { uf: "RJ", empresa: "Telefonica", bucket: "ZONA SUL 4", matricula: "03523247", super: "DIOGO GONCALVES LIMA DE ANDRADE", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" },
-            "GABRIEL DOS SANTOS SILVA": { uf: "RJ", empresa: "Telefonica", bucket: "ZONA SUL 1", matricula: "03552297", super: "MARCELO ANTUNES DO ESPIRITO SANTO BARRETO", coord: "RAPHAEL NICACIO COSTA DA SILVA", gerente: "JOAO FERNANDO NUNES LIMA" }
-        };
+            <div class="dashboard-grid">
+                <div class="db-card">
+                    <h3>UF</h3><span class="value" id="count-uf">0</span>
+                </div>
+                <div class="db-card">
+                    <h3>Empresa</h3><span class="value" id="count-empresa">0</span>
+                </div>
+                <div class="db-card">
+                    <h3>Colab.</h3><span class="value" id="count-colab">0</span>
+                </div>
+                <div class="db-card">
+                    <h3>Superv.</h3><span class="value" id="count-super">0</span>
+                </div>
+                <div class="db-card">
+                    <h3>Gerente TEL</h3><span class="value" id="count-gerente">0</span>
+                </div>
+            </div>
 
-        const listaStatus = ["PRESENTE", "FALTA", "ATESTADO", "FOLGA", "FÉRIAS"];
+            <div class="add-box">
+                <select id="uf" onchange="filtrarRegioes()">
+                    <option disabled selected value="">1º Selecione a UF</option>
+                    <option value="RJ">RJ - Rio de Janeiro</option>
+                    <option value="ES">ES - Espírito Santo</option>
+                </select>
 
-        window.onload = () => {
-            document.getElementById('dataSelecionada').value = new Date().toISOString().split('T')[0];
-            popularUFs();
-            gerarStatus();
-            atualizarTabela();
-        };
+                <select id="regiao" onchange="filtrarSupervisores()">
+                    <option disabled selected value="">2º Selecione a Região</option>
+                </select>
 
-        function popularUFs() {
-            const ufs = [...new Set(Object.values(baseDados).map(d => d.uf))].sort();
-            document.getElementById('filtroUf').innerHTML = '<option value="">Filtro por UF</option>' + ufs.map(u => `<option value="${u}">${u}</option>`).join('');
-        }
+                <select id="supervisorTLP" onchange="filtrarColaboradores()">
+                    <option disabled selected value="">3º Selecione o Supervisor</option>
+                </select>
 
-        function popularSupervisores() {
-            const uf = document.getElementById('filtroUf').value;
-            const supers = [...new Set(Object.values(baseDados).filter(d => d.uf === uf).map(d => d.super))].sort();
-            document.getElementById('filtroSuper').innerHTML = '<option value="">Filtro por Supervisor</option>' + supers.map(s => `<option value="${s}">${s}</option>`).join('');
-            document.getElementById('listaTecnicos').innerHTML = '';
-        }
+                <div class="section-header" onclick="toggleSection('colabSection', this)">
+                    <span>Selecione os Colaboradores</span><span class="arrow">▼</span>
+                </div>
+                <div id="colabSection" class="list-container">
+                    <div id="colaboradoresCheckboxes" style="display: contents;"></div>
+                </div>
 
-        function popularTecnicos() {
-            const sv = document.getElementById('filtroSuper').value;
-            const tecnicos = Object.keys(baseDados).filter(n => baseDados[n].super === sv).sort();
-            document.getElementById('listaTecnicos').innerHTML = tecnicos.map(t => `
-                <label class="item-check">
-                    <input type="checkbox" name="tec" value="${t}"> 
-                    <span>${t}</span>
-                </label>`).join('');
-        }
+                <div class="section-header" onclick="toggleSection('statusSection', this)">
+                    <span>Selecione o Status</span><span class="arrow">▼</span>
+                </div>
+                <div id="statusSection" class="list-container">
+                    <div id="statusRadios" class="status-radio-group"></div>
+                </div>
+            </div>
 
-        function gerarStatus() {
-            document.getElementById('statusRadios').innerHTML = listaStatus.map(s => `
-                <label class="item-check">
-                    <input type="radio" name="status" value="${s}"> <span>${s}</span>
-                </label>`).join('');
-        }
+            <div class="import-box">
+                <div class="import-title"><span class="icon">📥</span> Importar via planilha (.xlsx)</div>
+                <input type="file" id="arquivoImportacao" accept=".xlsx,.xls">
+                <button class="btn-lancar" onclick="importarPlanilha()">Importar</button>
 
-        function salvarPresenca() {
-            const dataSel = document.getElementById('dataSelecionada').value;
-            const selecionados = Array.from(document.querySelectorAll('input[name="tec"]:checked')).map(i => i.value);
-            const status = document.querySelector('input[name="status"]:checked')?.value;
+                <div id="resultadoImportacao" class="resultado"></div>
+            </div>
 
-            if (!dataSel || selecionados.length === 0 || !status) return alert("Preencha todos os campos!");
+            <div class="search-box">
+                <input type="text" id="inputBusca" onkeyup="filtrarTabela()"
+                    placeholder="Buscar por Colaborador ou UF...">
+            </div>
 
-            let db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+            <div style="overflow-x:auto;">
+                <table id="tabelaPresenca">
+                    <thead>
+                        <tr>
+                            <th>UF</th>
+                            <th>Empresa</th>
+                            <th>Micro Área</th>
+                            <th>Colaborador</th>
+                            <th>Supervisor</th>
+                            <th>Coordenador</th>
+                            <th>Gerente TEL</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista"></tbody>
+                </table>
+            </div>
 
-            selecionados.forEach(nome => {
-                let datasParaLancar = [dataSel];
-                if (status === "PRESENTE") {
-                    const d = new Date(dataSel + "T12:00:00");
-                    const ultimoDia = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-                    for (let i = d.getDate() + 1; i <= ultimoDia; i++) {
-                        datasParaLancar.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`);
-                    }
-                }
-                datasParaLancar.forEach(dt => {
-                    if (!db.find(r => r.data === dt && r.tecnico === nome)) {
-                        db.push({ id: Date.now() + Math.random(), data: dt, ...baseDados[nome], tecnico: nome, status: status });
-                    }
-                });
-            });
+            <button class="btn-lancar" onclick="salvarPresenca()">Salvar Presença Manual</button>
+        </div>
+    </div>
 
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-            atualizarTabela();
-            alert("Lançamento concluído!");
-        }
+    <div id="modalNotas" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" style="display: flex; justify-content: space-between;">
+                <h2 style="margin:0;">📝 Bloco de Notas</h2>
+                <small>ID: <span id="modalId"></span></small>
+            </div>
+            <textarea id="notaTexto" style="width: 100%; height: 150px; margin-top: 15px; padding: 10px;"></textarea>
+            <div style="text-align: right; margin-top: 10px;">
+                <button onclick="fecharModal()"
+                    style="background: var(--surface-2); color: var(--text);">Cancelar</button>
+                <button onclick="salvarNotaBD()" style="background: var(--success); color:white;">💾 Salvar</button>
+            </div>
+        </div>
+    </div>
 
-        function atualizarTabela() {
-            const dt = document.getElementById('dataSelecionada').value;
-            const busca = document.getElementById('inputBusca').value.toUpperCase();
-            const limite = parseInt(document.getElementById('limiteRegistros').value);
-
-            let db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
-            let filtrados = db.filter(r => r.data === dt && (r.tecnico.toUpperCase().includes(busca) || r.matricula.includes(busca))).sort((a, b) => a.tecnico.localeCompare(b.tecnico));
-
-            document.getElementById('count-uf').innerText = [...new Set(filtrados.map(r => r.uf))].length;
-            document.getElementById('count-colab').innerText = filtrados.length;
-            document.getElementById('count-super').innerText = [...new Set(filtrados.map(r => r.super))].length;
-            document.getElementById('count-gerente').innerText = [...new Set(filtrados.map(r => r.gerente))].length;
-            document.getElementById('count-empresa').innerText = [...new Set(filtrados.map(r => r.empresa))].length;
-
-            const visualizados = filtrados.slice(0, limite);
-            document.getElementById('corpoTabela').innerHTML = visualizados.map(r => `
-                <tr>
-                    <td>${r.uf}</td>
-                    <td>${r.empresa}</td>
-                    <td>${r.bucket}</td>
-                    <td>${r.matricula}</td>
-                    <td><b>${r.tecnico}</b></td>
-                    <td>${r.super}</td>
-                    <td>${r.coord || '-'}</td>
-                    <td>${r.gerente || '-'}</td>
-                    <td><span style="padding:4px 8px; border-radius:10px; font-weight:bold; background:#eee;">${r.status}</span></td>
-                    <td><button onclick="deletar('${r.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button></td>
-                </tr>
-            `).join('');
-        }
-
-        function deletar(id) {
-            let db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
-            db = db.filter(r => String(r.id) !== String(id));
-            localStorage.setItem(DB_KEY, JSON.stringify(db));
-            atualizarTabela();
-        }
-
-        function selectAll(check) { document.querySelectorAll('input[name="tec"]').forEach(c => c.checked = check); }
-
-        function limparTudo() {
-            if (confirm("Apagar todos os registros?")) {
-                localStorage.removeItem(DB_KEY);
-                atualizarTabela();
-            }
-        }
-
-        function exportarExcel() {
-            const db = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
-            if (db.length === 0) return alert("Sem dados.");
-            const ws = XLSX.utils.json_to_sheet(db);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Presença");
-            XLSX.writeFile(wb, "Relatorio.xlsx");
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 
 </html>
