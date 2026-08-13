@@ -153,6 +153,21 @@ async function salvarPresenca() {
     if (!status) return alert("Selecione o status!");
     if (selecionados.length === 0) return alert("Selecione pelo menos um colaborador!");
 
+    // Verifica se algum dos selecionados já tem presença lançada nesta mesma data
+    // (registrosDoDia já está carregado para a data selecionada em tela).
+    const jaLancados = selecionados.filter(nome =>
+        registrosDoDia.some(r => (r.nome || '').trim().toUpperCase() === nome.trim().toUpperCase())
+    );
+
+    if (jaLancados.length > 0) {
+        const continuar = confirm(
+            `⚠️ Os seguintes colaboradores já têm presença lançada em ${data}:\n\n` +
+            jaLancados.join('\n') +
+            `\n\nSe continuar, o lançamento existente deles será ATUALIZADO com o novo status (não duplica). Deseja continuar?`
+        );
+        if (!continuar) return;
+    }
+
     const registros = selecionados.map(nome => {
         const info = baseDados[regiaoChave][nome];
         return {
@@ -170,11 +185,37 @@ async function salvarPresenca() {
         };
     });
 
-    const { error } = await _supabase.from('registros_presenca').insert(registros);
-    if (error) {
-        alert("Erro ao salvar: " + error.message);
+    // Separa quem já tem registro nesta data (vira update) de quem é novo (vira insert)
+    const paraAtualizar = [];
+    const paraInserir = [];
+    registros.forEach(reg => {
+        const existente = registrosDoDia.find(r => (r.nome || '').trim().toUpperCase() === reg.nome.trim().toUpperCase());
+        if (existente) {
+            paraAtualizar.push({ id: existente.id, status: reg.status });
+        } else {
+            paraInserir.push(reg);
+        }
+    });
+
+    let erroFinal = null;
+
+    if (paraInserir.length > 0) {
+        const { error } = await _supabase.from('registros_presenca').insert(paraInserir);
+        if (error) erroFinal = error;
+    }
+
+    for (const item of paraAtualizar) {
+        const { error } = await _supabase.from('registros_presenca').update({ status: item.status }).eq('id', item.id);
+        if (error) erroFinal = error;
+    }
+
+    if (erroFinal) {
+        alert("Erro ao salvar: " + erroFinal.message);
     } else {
-        alert("Salvo com sucesso!");
+        const partes = [];
+        if (paraInserir.length > 0) partes.push(`${paraInserir.length} novo(s)`);
+        if (paraAtualizar.length > 0) partes.push(`${paraAtualizar.length} atualizado(s)`);
+        alert("Salvo com sucesso! " + partes.join(" / "));
         atualizarTabela();
     }
 }
@@ -358,6 +399,12 @@ async function importarPlanilha() {
     atualizarTabela();
 }
 
+// Estado da tabela: guarda os registros do dia já sem duplicados,
+// e controla a paginação/filtro de busca aplicados sobre eles.
+let registrosDoDia = [];
+let paginaAtual = 1;
+let itensPorPagina = 50;
+
 async function atualizarTabela() {
     const dataFiltro = document.getElementById("dataSelecionada").value;
     const { data: registros, error } = await _supabase
@@ -365,29 +412,74 @@ async function atualizarTabela() {
         .select('*')
         .eq('data', dataFiltro);
 
-    const lista = document.getElementById("lista");
-    lista.innerHTML = "";
+    if (!registros) return;
 
-    if (registros) {
-        registros.forEach(r => {
-            lista.innerHTML += `
-                        <tr>
-                            <td>${r.uf}</td>
-                            <td>${r.empresa}</td>
-                            <td>${r.micro_area || ''}</td>
-                            <td>${r.nome}</td>
-                            <td>${r.supervisor}</td>
-                            <td>${r.coordenador}</td>
-                            <td>${r.gerente_tel}</td>
-                            <td><b>${r.status}</b></td>
-                            <td>
-                                <button class="btn-note" onclick="abrirModal(${r.id}, '${r.observacao || ''}')">Nota</button>
-                                <button class="btn-del" onclick="deletar(${r.id})">Excluir</button>
-                            </td>
-                        </tr>`;
-        });
-        atualizarDashboard(registros);
-    }
+    // Remove duplicados: se o mesmo colaborador aparecer mais de uma vez
+    // na mesma data (ex: importado duas vezes), mantém só o registro
+    // mais recente (maior id) para não poluir a tabela.
+    const porNome = new Map();
+    registros
+        .slice()
+        .sort((a, b) => a.id - b.id)
+        .forEach(r => porNome.set((r.nome || '').trim().toUpperCase(), r));
+
+    registrosDoDia = Array.from(porNome.values())
+        .sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+
+    paginaAtual = 1;
+    renderizarTabela();
+    atualizarDashboard(registrosDoDia);
+}
+
+function aplicarFiltroBusca(lista) {
+    const busca = (document.getElementById("inputBusca").value || "").toLowerCase().trim();
+    if (!busca) return lista;
+    return lista.filter(r =>
+        [r.uf, r.empresa, r.micro_area, r.nome, r.supervisor, r.coordenador, r.gerente_tel, r.status]
+            .some(campo => (campo || '').toString().toLowerCase().includes(busca))
+    );
+}
+
+function renderizarTabela() {
+    const lista = document.getElementById("lista");
+    const filtrados = aplicarFiltroBusca(registrosDoDia);
+
+    const totalPaginas = Math.max(1, Math.ceil(filtrados.length / itensPorPagina));
+    if (paginaAtual > totalPaginas) paginaAtual = totalPaginas;
+
+    const inicio = (paginaAtual - 1) * itensPorPagina;
+    const pagina = filtrados.slice(inicio, inicio + itensPorPagina);
+
+    lista.innerHTML = pagina.map(r => `
+                <tr>
+                    <td>${r.uf}</td>
+                    <td>${r.empresa}</td>
+                    <td>${r.micro_area || ''}</td>
+                    <td>${r.nome}</td>
+                    <td>${r.supervisor}</td>
+                    <td>${r.coordenador}</td>
+                    <td>${r.gerente_tel}</td>
+                    <td><b>${r.status}</b></td>
+                    <td>
+                        <button class="btn-note" title="Nota" onclick="abrirModal(${r.id}, '${(r.observacao || '').replace(/'/g, "\\'")}')">📝</button>
+                        <button class="btn-del" title="Excluir" onclick="deletar(${r.id})">🗑️</button>
+                    </td>
+                </tr>`).join('');
+
+    document.getElementById('infoPagina').innerText = `Página ${paginaAtual} de ${totalPaginas} (${filtrados.length} registro${filtrados.length === 1 ? '' : 's'})`;
+    document.getElementById('btnPagAnterior').disabled = paginaAtual <= 1;
+    document.getElementById('btnPagProxima').disabled = paginaAtual >= totalPaginas;
+}
+
+function mudarPagina(delta) {
+    paginaAtual += delta;
+    renderizarTabela();
+}
+
+function mudarItensPorPagina() {
+    itensPorPagina = parseInt(document.getElementById('itensPorPagina').value, 10);
+    paginaAtual = 1;
+    renderizarTabela();
 }
 
 function atualizarDashboard(regs) {
@@ -411,10 +503,8 @@ function toggleSection(id, element) {
 }
 
 function filtrarTabela() {
-    const busca = document.getElementById("inputBusca").value.toLowerCase();
-    document.querySelectorAll("#lista tr").forEach(linha => {
-        linha.style.display = linha.innerText.toLowerCase().includes(busca) ? "" : "none";
-    });
+    paginaAtual = 1;
+    renderizarTabela();
 }
 
 function abrirModal(id, texto) {

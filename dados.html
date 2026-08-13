@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Colaboradores</title>
+    <script>
+        // Aplica o tema salvo antes de renderizar, evitando "flash" de tema errado
+        (function () {
+            const temaSalvo = localStorage.getItem('tema') ||
+                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', temaSalvo);
+        })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="login-view">
+        <div class="login-card">
+            <img src="tel.jpg" alt="Logo TLP" class="login-logo">
+            <h2 style="color: var(--primary); margin-bottom: 20px;">Acesso Restrito</h2>
+            <input type="email" id="login-user" placeholder="E-mail">
+            <input type="password" id="login-pass" placeholder="Senha">
+            <button class="btn-entrar" onclick="realizarLogin()">ENTRAR</button>
+            <p id="login-error" style="color:red; font-size: 12px; margin-top: 10px;"></p>
+        </div>
+    </div>
+
+    <div id="dashboard-view" class="hidden">
+        <div class="container">
+            <header>
+                <h1>Cadastro de Colaboradores</h1>
+                <div class="header-actions">
+                    <button class="theme-toggle" id="themeToggleBtn" onclick="alternarTema()"
+                        title="Alternar tema claro/escuro">🌙</button>
+                    <a href="index.html" class="link-analitico">⬅ Painel de Presença</a>
+                    <a href="analise.html" class="link-analitico">Analítico</a>
+                    <button class="btn-logout" onclick="realizarLogout()">Sair</button>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <div class="db-card">
+                    <h3>Total</h3>
+                    <div class="value" id="count-total">0</div>
+                </div>
+                <div class="db-card">
+                    <h3>RJ Capital</h3>
+                    <div class="value" id="count-rjc">0</div>
+                </div>
+                <div class="db-card">
+                    <h3>RJ Interior</h3>
+                    <div class="value" id="count-rji">0</div>
+                </div>
+                <div class="db-card">
+                    <h3>ES Capital</h3>
+                    <div class="value" id="count-esc">0</div>
+                </div>
+                <div class="db-card">
+                    <h3>ES Interior</h3>
+                    <div class="value" id="count-esi">0</div>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom: 16px;">
+                <div class="search-box" style="flex:1; min-width:220px; margin:0;">
+                    <input type="text" id="inputBusca" onkeyup="filtrarTabela()"
+                        placeholder="Buscar por nome, supervisor, coordenador, micro área...">
+                </div>
+                <button class="btn-lancar" style="width:auto; margin:0;" onclick="abrirModalColaborador(null)">➕
+                    Adicionar Colaborador</button>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table id="tabelaColaboradores">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Região</th>
+                            <th>UF</th>
+                            <th>Empresa</th>
+                            <th>Supervisor</th>
+                            <th>Coordenador</th>
+                            <th>Gerente TEL</th>
+                            <th>Micro Área</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista"></tbody>
+                </table>
+            </div>
+
+            <div class="paginacao">
+                <div class="paginacao-esquerda">
+                    <label for="itensPorPagina">Linhas por página:</label>
+                    <select id="itensPorPagina" onchange="mudarItensPorPagina()">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="250">250</option>
+                        <option value="1000">1000</option>
+                    </select>
+                </div>
+                <div class="paginacao-direita">
+                    <button class="btn-pag" onclick="mudarPagina(-1)" id="btnPagAnterior">‹ Anterior</button>
+                    <span id="infoPagina">Página 1 de 1</span>
+                    <button class="btn-pag" onclick="mudarPagina(1)" id="btnPagProxima">Próxima ›</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalColaborador" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items:center;">
+                <h2 style="margin:0;" id="modalTitulo">➕ Adicionar Colaborador</h2>
+            </div>
+
+            <input type="hidden" id="colabId">
+
+            <div style="margin-top: 15px; display: grid; gap: 10px;">
+                <div>
+                    <label style="font-size:12px; color:var(--text-muted); font-weight:600;">Nome</label>
+                    <input type="text" id="colabNome" placeholder="Nome completo do colaborador">
+                </div>
+                <div>
+                    <label style="font-size:12px; color:var(--text-muted); font-weight:600;">Região</label>
+                    <select id="colabRegiao">
+                        <option value="RJ_CAPITAL">RJ Capital</option>
+                        <option value="RJ_INTERIOR">RJ Interior</option>
+                        <option value="ES_CAPITAL">ES Capital</option>
+                        <option value="ES_INTERIOR">ES Interior</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:12px; color:var(--text-muted); font-weight:600;">Empresa</label>
+                    <input type="text" id="colabEmpresa" placeholder="Ex: TEL TELECOMUNICAÇÕES">
+                </div>
+                <div>
+                    <label style="font-size:12px; color:var(--text-muted); font-weight:600;">Supervisor</label>
+                    <input type="text" id="colabSupervisor" placeholder="Nome do supervisor">
+                </div>
+                <div>
+                    <label style="font-size:12px; color:var(--text-muted); font-weight:600;">Coordenador</label>
+                    <input type="text" id="colabCoordenador" placeholder="Nome do coordenador">
+                </div>
+                <div>
+                    <label style="font-size:12px; color:var(--text-muted); font-weight:600;">Gerente TEL</label>
+                    <input type="text" id="colabGerente" placeholder="Nome do gerente">
+                </div>
+                <div>
+                    <label style="font-size:12px; color:var(--text-muted); font-weight:600;">Micro Área</label>
+                    <input type="text" id="colabMicroArea" placeholder="Ex: RJ-CAPITAL 1 A 4">
+                </div>
+            </div>
+
+            <p id="colabErro" style="color: var(--danger); font-size: 12px; margin-top: 8px;"></p>
+
+            <div style="text-align: right; margin-top: 16px;">
+                <button onclick="fecharModalColaborador()"
+                    style="background: var(--surface-2); color: var(--text);">Cancelar</button>
+                <button onclick="salvarColaborador()" style="background: var(--success); color:white;">💾
+                    Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="dados.js"></script>
+</body>
+
+</html>

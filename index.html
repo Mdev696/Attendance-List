@@ -39,6 +39,7 @@
                     <input type="date" id="dataSelecionada" onchange="atualizarTabela()" style="width: auto;">
                     <button class="theme-toggle" id="themeToggleBtn" onclick="alternarTema()"
                         title="Alternar tema claro/escuro">🌙</button>
+                    <a href="dados.html" class="link-analitico">Colaboradores</a>
                     <a href="analise.html" class="link-analitico">Analítico</a>
                     <button class="btn-logout" onclick="realizarLogout()">Sair</button>
                 </div>
@@ -96,7 +97,6 @@
                 <div class="import-title"><span class="icon">📥</span> Importar via planilha (.xlsx)</div>
                 <input type="file" id="arquivoImportacao" accept=".xlsx,.xls">
                 <button class="btn-lancar" onclick="importarPlanilha()">Importar</button>
-
                 <div id="resultadoImportacao" class="resultado"></div>
             </div>
 
@@ -122,6 +122,26 @@
                     </thead>
                     <tbody id="lista"></tbody>
                 </table>
+            </div>
+
+            <div class="paginacao">
+                <div class="paginacao-esquerda">
+                    <label for="itensPorPagina">Linhas por página:</label>
+                    <select id="itensPorPagina" onchange="mudarItensPorPagina()">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="250">250</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                    </select>
+                </div>
+                <div class="paginacao-direita">
+                    <button class="btn-pag" onclick="mudarPagina(-1)" id="btnPagAnterior">‹ Anterior</button>
+                    <span id="infoPagina">Página 1 de 1</span>
+                    <button class="btn-pag" onclick="mudarPagina(1)" id="btnPagProxima">Próxima ›</button>
+                </div>
             </div>
 
             <button class="btn-lancar" onclick="salvarPresenca()">Salvar Presença Manual</button>
