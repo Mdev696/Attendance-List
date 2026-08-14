@@ -100,9 +100,13 @@
                 <div id="resultadoImportacao" class="resultado"></div>
             </div>
 
-            <div class="search-box">
-                <input type="text" id="inputBusca" onkeyup="filtrarTabela()"
-                    placeholder="Buscar por Colaborador ou UF...">
+            <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin: 4px 0 16px 0;">
+                <div class="search-box" style="flex:1; min-width:220px; margin:0;">
+                    <input type="text" id="inputBusca" onkeyup="filtrarTabela()"
+                        placeholder="Buscar por Colaborador ou UF...">
+                </div>
+                <button class="btn-del" style="width:auto; height:auto; padding:10px 18px; font-size:13px;"
+                    onclick="limparTabela()">🗑️ Limpar Tabela</button>
             </div>
 
             <div style="overflow-x:auto;">

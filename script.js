@@ -497,6 +497,30 @@ async function deletar(id) {
     }
 }
 
+// Apaga TODOS os registros de presença da data selecionada no painel.
+// Não afeta outras datas — só o que está sendo exibido na tabela agora.
+async function limparTabela() {
+    const data = document.getElementById("dataSelecionada").value;
+
+    if (!data) return alert("Selecione uma data primeiro!");
+    if (registrosDoDia.length === 0) return alert("Não há registros nesta data para limpar.");
+
+    const confirmar = confirm(
+        `⚠️ ATENÇÃO: isso vai EXCLUIR PERMANENTEMENTE os ${registrosDoDia.length} registro(s) de presença do dia ${data}.\n\n` +
+        `Essa ação não pode ser desfeita. Deseja continuar?`
+    );
+    if (!confirmar) return;
+
+    const { error } = await _supabase.from('registros_presenca').delete().eq('data', data);
+
+    if (error) {
+        alert("Erro ao limpar a tabela: " + error.message);
+    } else {
+        alert(`Tabela do dia ${data} limpa com sucesso.`);
+        atualizarTabela();
+    }
+}
+
 function toggleSection(id, element) {
     document.getElementById(id).classList.toggle("hidden");
     element.classList.toggle("collapsed");

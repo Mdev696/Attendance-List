@@ -213,3 +213,41 @@ async function excluirColaborador(id, nome) {
     }
     await carregarColaboradores();
 }
+
+// ---------- EXPORTAR EXCEL ----------
+function exportarExcel() {
+    const filtrados = aplicarFiltroBusca(todosColaboradores);
+
+    if (!filtrados.length) {
+        alert("Não há colaboradores para exportar.");
+        return;
+    }
+
+    const dadosPlanilha = filtrados.map(c => ({
+        'Nome': c.nome || '',
+        'Região': LABEL_REGIAO[c.regiao] || c.regiao || '',
+        'UF': c.uf || '',
+        'Empresa': c.empresa || '',
+        'Supervisor': c.supervisor || '',
+        'Coordenador': c.coordenador || '',
+        'Gerente TEL': c.gerente_tel || '',
+        'Micro Área': c.micro_area || ''
+    }));
+
+    const planilha = XLSX.utils.json_to_sheet(dadosPlanilha);
+    const livro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(livro, planilha, 'Colaboradores');
+
+    // Largura automática básica das colunas
+    const larguras = Object.keys(dadosPlanilha[0]).map(chave => {
+        const maiorValor = Math.max(
+            chave.length,
+            ...dadosPlanilha.map(linha => (linha[chave] || '').toString().length)
+        );
+        return { wch: maiorValor + 2 };
+    });
+    planilha['!cols'] = larguras;
+
+    const dataHoje = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(livro, `colaboradores_${dataHoje}.xlsx`);
+}
